@@ -1,7 +1,9 @@
-<?php 
-session_start(); 
-include 'db.php';  
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
+include 'db.php';
 // Check if user is logged in
 if (!isset($_SESSION['tenant_id'])) { 
     header("Location: login.php"); 

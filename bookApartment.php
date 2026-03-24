@@ -1,5 +1,8 @@
-<?php 
-session_start(); 
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 include 'db.php'; 
 
 if (!isset($_SESSION['tenant_id'])) { 

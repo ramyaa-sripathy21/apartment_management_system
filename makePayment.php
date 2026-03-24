@@ -1,7 +1,8 @@
 <?php
-die("TEST");
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-session_start();
 include 'db.php';
 
 // Check if the tenant is logged in
