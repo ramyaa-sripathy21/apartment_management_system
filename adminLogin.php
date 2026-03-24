@@ -1,8 +1,9 @@
-<<<<<<< HEAD
 <?php
-session_start();
-include 'db.php';
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
+include 'db.php';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['admin_username'];
     $password = $_POST['admin_password'];
