@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?php
 session_start();
 include 'db.php';
@@ -86,7 +85,7 @@ $payment = $result->fetch_assoc();
 
 </body>
 </html>
-=======
+
 <?php
 session_start();
 include 'db.php';
@@ -174,4 +173,4 @@ $payment = $result->fetch_assoc();
 
 </body>
 </html>
->>>>>>> 672668be1d16b8d30d59f1243587c110d07acf5e
+

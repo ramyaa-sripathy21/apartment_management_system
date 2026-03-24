@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?php
 session_start();
 include 'db.php';
@@ -85,7 +84,7 @@ if (isset($_GET['tenant_id'])) {
     </div>
 </body>
 </html>
-=======
+
 <?php
 session_start();
 include 'db.php';
@@ -172,4 +171,4 @@ if (isset($_GET['tenant_id'])) {
     </div>
 </body>
 </html>
->>>>>>> 672668be1d16b8d30d59f1243587c110d07acf5e
+

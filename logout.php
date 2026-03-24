@@ -11,7 +11,7 @@ session_destroy();
 header("Location: index.php");  // You can change this to 'login.php' if you want to redirect to the login page
 exit();  // Ensures the script stops after the redirect
 ?>
-=======
+
 <?php
 session_start(); // Start the session
 
@@ -25,4 +25,4 @@ session_destroy();
 header("Location: index.php");  // You can change this to 'login.php' if you want to redirect to the login page
 exit();  // Ensures the script stops after the redirect
 ?>
->>>>>>> 672668be1d16b8d30d59f1243587c110d07acf5e
+
