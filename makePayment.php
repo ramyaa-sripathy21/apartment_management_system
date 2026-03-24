@@ -41,8 +41,8 @@ if ($res && $res->num_rows > 0) {
 if (isset($_POST['submit'])) {
     $amount = $_POST['amount'];
 
-    $conn->query("INSERT INTO Payments (Tenant_ID, Amount, Payment_Status)
-                  VALUES ('$tenant_id', '$amount', 'Pending')");
+    $conn->query("INSERT INTO Payments (Tenant_ID, Amount, Payment_Date, Payment_Status)
+VALUES ('$tenant_id', '$amount', CURDATE(), 'Pending')");
 
     header("Location: tenantDashboard.php");
     exit();
