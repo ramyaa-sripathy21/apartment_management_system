@@ -1,12 +1,14 @@
 <?php
-$host = "enterbeam.proxy.rlwy.net";
+$host = "mysql.railway.internal";
 $user = "root";
-$pass = "vZEXDTBzvIcomKzdICMhNCgJlRDoxDLV";
+$pass = "vZEXDTBzvlcomKzdICMhNCgJLRDoxDLV";
 $db   = "railway";
-$port = 38513;
+$port = 3306;
 
+// Create connection
 $conn = new mysqli($host, $user, $pass, $db, $port);
 
+// Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
