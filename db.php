@@ -1,21 +1,7 @@
 <?php
-$url = getenv("DATABASE_URL");
+echo "STEP 1<br>";
 
-if (!$url) {
-    die("DATABASE_URL not set");
-}
+include 'db.php';
 
-$parts = parse_url($url);
-
-$host = $parts['host'];
-$user = $parts['user'];
-$pass = $parts['pass'];
-$db   = ltrim($parts['path'], '/');
-$port = $parts['port'];
-
-$conn = new mysqli($host, $user, $pass, $db, $port);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-?>
+echo "STEP 2<br>";
+exit();
