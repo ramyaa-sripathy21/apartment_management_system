@@ -1,24 +1,16 @@
 <?php
-$url = getenv("DATABASE_URL");
+// Railway MySQL connection
 
-if (!$url) {
-    die("DATABASE_URL missing");
-}
+$host = getenv("MYSQLHOST");
+$user = getenv("MYSQLUSER");
+$pass = getenv("MYSQLPASSWORD");
+$db   = getenv("MYSQLDATABASE");
+$port = getenv("MYSQLPORT");
 
-$db = parse_url($url);
+// Create connection
+$conn = new mysqli($host, $user, $pass, $db, $port);
 
-if (!$db || !isset($db['host'])) {
-    die("Invalid DATABASE_URL");
-}
-
-$host = $db['host'];
-$user = $db['user'];
-$pass = $db['pass'];
-$dbname = ltrim($db['path'], '/');
-$port = $db['port'];
-
-$conn = new mysqli("localhost", "root", "", "your_database_name");
-
+// Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
