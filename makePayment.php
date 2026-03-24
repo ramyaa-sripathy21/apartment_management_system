@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <?php
 die("TEST");
 
