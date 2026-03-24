@@ -1,6 +1,10 @@
 <?php
 $url = getenv("DATABASE_URL");
 
+if (!$url) {
+    die("DATABASE_URL not set");
+}
+
 $parts = parse_url($url);
 
 $host = $parts['host'];
