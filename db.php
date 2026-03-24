@@ -1,12 +1,16 @@
 <?php
-$host = getenv("DB_HOST");
-$user = getenv("DB_USER");
-$password = getenv("DB_PASS");
-$db = getenv("DB_NAME");
+$url = getenv("DATABASE_URL");
 
-$conn = new mysqli($host, $user, $password, $db);
+$parts = parse_url($url);
 
-// Check the connection
+$host = $parts['host'];
+$user = $parts['user'];
+$pass = $parts['pass'];
+$db   = ltrim($parts['path'], '/');
+$port = $parts['port'];
+
+$conn = new mysqli($host, $user, $pass, $db, $port);
+
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
