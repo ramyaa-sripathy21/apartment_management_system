@@ -1,5 +1,6 @@
-```php
 <?php
+ob_start(); // Fix header errors
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -156,19 +157,25 @@ tr:hover {
     <th>Status</th>
 </tr>
 
-<?php while($row = $result->fetch_assoc()): ?>
-<tr>
-    <td><?php echo $row['Payment_ID']; ?></td>
-    <td><?php echo $row['Tenant_ID']; ?></td>
-    <td>₹ <?php echo $row['Amount']; ?></td>
-    <td><?php echo $row['Payment_Date']; ?></td>
-    <td>
-        <span class="status <?php echo strtolower($row['Payment_Status']); ?>">
-            <?php echo $row['Payment_Status']; ?>
-        </span>
-    </td>
-</tr>
-<?php endwhile; ?>
+<?php if ($result->num_rows > 0): ?>
+    <?php while($row = $result->fetch_assoc()): ?>
+    <tr>
+        <td><?php echo $row['Payment_ID'] ?? '-'; ?></td>
+        <td><?php echo $row['Tenant_ID'] ?? '-'; ?></td>
+        <td>₹ <?php echo $row['Amount'] ?? '0'; ?></td>
+        <td><?php echo $row['Payment_Date'] ?? '-'; ?></td>
+        <td>
+            <span class="status <?php echo strtolower($row['Payment_Status'] ?? 'pending'); ?>">
+                <?php echo $row['Payment_Status'] ?? 'Pending'; ?>
+            </span>
+        </td>
+    </tr>
+    <?php endwhile; ?>
+<?php else: ?>
+    <tr>
+        <td colspan="5">No payments found</td>
+    </tr>
+<?php endif; ?>
 
 </table>
 
@@ -177,4 +184,3 @@ tr:hover {
 
 </body>
 </html>
-```

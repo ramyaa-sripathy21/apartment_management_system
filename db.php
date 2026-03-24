@@ -17,7 +17,7 @@ $pass = $db['pass'];
 $dbname = ltrim($db['path'], '/');
 $port = $db['port'];
 
-$conn = new mysqli($host, $user, $pass, $dbname, $port);
+$conn = new mysqli("localhost", "root", "", "your_database_name");
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
