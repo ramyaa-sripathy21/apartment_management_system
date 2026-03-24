@@ -1,7 +1,17 @@
 <?php
-echo "STEP 1<br>";
+$url = getenv("DATABASE_URL");
 
-include 'db.php';
+$parts = parse_url($url);
 
-echo "STEP 2<br>";
-exit();
+$host = $parts['host'];
+$user = $parts['user'];
+$pass = $parts['pass'];
+$db   = ltrim($parts['path'], '/');
+$port = $parts['port'];
+
+$conn = new mysqli($host, $user, $pass, $db, $port);
+
+if ($conn->connect_error) {
+    die("DB ERROR: " . $conn->connect_error);
+}
+?>
