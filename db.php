@@ -1,7 +1,15 @@
 <?php
-$url = getenv("mysql://root:vZEXDTBzvlcomKzdICMhNCgJLRDoxDLV@centerbeam.proxy.rlwy.net:38513/railway");
+$url = getenv("DATABASE_URL");
+
+if (!$url) {
+    die("DATABASE_URL missing");
+}
 
 $db = parse_url($url);
+
+if (!$db || !isset($db['host'])) {
+    die("Invalid DATABASE_URL");
+}
 
 $host = $db['host'];
 $user = $db['user'];
