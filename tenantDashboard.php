@@ -11,6 +11,15 @@ $name = $_SESSION['tenant_name'] ?? 'Tenant';
 
 // available apartments
 $result = $conn->query("SELECT * FROM apartment WHERE Availability_Status='Available'");
+
+// booked apartments
+$tenant_id = $_SESSION['tenant_id'];
+$booked = $conn->query("
+    SELECT a.* 
+    FROM tenant_apartment_booking t
+    JOIN apartment a ON t.Apartment_No = a.Apartment_No
+    WHERE t.Tenant_ID = '$tenant_id'
+");
 ?>
 
 <!DOCTYPE html>
@@ -20,6 +29,7 @@ $result = $conn->query("SELECT * FROM apartment WHERE Availability_Status='Avail
 
 <style>
 body { margin:0; font-family:Segoe UI; background:#f4f7fc; }
+
 .sidebar {
     width:230px; height:100vh; position:fixed;
     background:#2c3e50; color:white; padding:20px;
@@ -34,6 +44,7 @@ body { margin:0; font-family:Segoe UI; background:#f4f7fc; }
 
 .card {
     background:white; padding:20px; border-radius:10px;
+    margin-bottom:20px;
 }
 
 table { width:100%; border-collapse:collapse; }
@@ -63,12 +74,9 @@ button {
 <script>alert("✅ Apartment booked successfully!");</script>
 <?php endif; ?>
 
-<?php if (isset($_GET['already'])): ?>
-<script>alert("⚠️ You already booked an apartment!");</script>
-<?php endif; ?>
-
 <h1>Welcome, <?= $name ?></h1>
 
+<!-- AVAILABLE -->
 <div class="card">
 <h3>Available Apartments</h3>
 
@@ -86,6 +94,24 @@ button {
 <button type="submit">Book</button>
 </form>
 </td>
+</tr>
+<?php endwhile; ?>
+
+</table>
+</div>
+
+<!-- BOOKED -->
+<div class="card">
+<h3>My Booked Apartments</h3>
+
+<table>
+<tr><th>No</th><th>Floor</th><th>Rent</th></tr>
+
+<?php while($b=$booked->fetch_assoc()): ?>
+<tr>
+<td><?= $b['Apartment_No'] ?></td>
+<td><?= $b['Floor_No'] ?></td>
+<td>₹<?= $b['Rent_Amount'] ?></td>
 </tr>
 <?php endwhile; ?>
 

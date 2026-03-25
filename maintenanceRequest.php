@@ -7,14 +7,24 @@ if (!isset($_SESSION['tenant_id'])) {
     exit();
 }
 
+$name = $_SESSION['tenant_name'] ?? 'Tenant';
 $tenant_id = $_SESSION['tenant_id'];
-$name = $_SESSION['tenant_name'];
 
-if(isset($_POST['submit'])){
+// submit request
+if (isset($_POST['submit'])) {
+
     $issue = $_POST['issue'];
-    $conn->query("INSERT INTO maintenance (tenant_id, issue, status)
-    VALUES ('$tenant_id','$issue','Pending')");
-    header("Location: tenantDashboard.php");
+
+    $stmt = $conn->prepare("
+        INSERT INTO maintenance_requests (Tenant_ID, Issue, Request_Date, Status)
+        VALUES (?, ?, CURDATE(), 'Pending')
+    ");
+
+    $stmt->bind_param("is", $tenant_id, $issue);
+    $stmt->execute();
+
+    header("Location: maintenanceRequest.php?success=1");
+    exit();
 }
 ?>
 
@@ -22,30 +32,57 @@ if(isset($_POST['submit'])){
 <html>
 <head>
 <title>Maintenance</title>
+
 <style>
 body { font-family:Segoe UI; background:#f4f7fc; display:flex; justify-content:center; }
+
 .box {
-    margin-top:80px; background:white; padding:25px;
-    width:400px; border-radius:10px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+    margin-top:60px;
+    background:white;
+    padding:25px;
+    width:420px;
+    border-radius:12px;
 }
-textarea { width:100%; height:120px; margin:10px 0; }
-button { width:100%; padding:10px; background:#e67e22; color:white; border:none; }
+
+textarea {
+    width:100%;
+    padding:10px;
+}
+
+button {
+    width:100%;
+    padding:12px;
+    background:#3498db;
+    color:white;
+    border:none;
+}
 </style>
+
 </head>
 
 <body>
 
 <div class="box">
-<h2>Maintenance Request</h2>
+
+<?php if (isset($_GET['success'])): ?>
+<script>
+alert("✅ Maintenance request submitted!");
+</script>
+<?php endif; ?>
+
+<h2>🛠 Maintenance Request</h2>
 <p>Welcome, <b><?= $name ?></b></p>
 
 <form method="POST">
 <textarea name="issue" placeholder="Describe issue..." required></textarea>
+
+<br><br>
 <button name="submit">Submit</button>
 </form>
 
+<br>
 <a href="tenantDashboard.php">Back</a>
+
 </div>
 
 </body>
