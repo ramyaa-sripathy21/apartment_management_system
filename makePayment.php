@@ -12,10 +12,10 @@ $name = $_SESSION['tenant_name'] ?? 'Tenant';
 
 // ✅ Get TOTAL rent
 $sql = "
-SELECT SUM(a.rent) AS total_rent
-FROM tenants t
-JOIN apartments a ON t.apartment_id = a.id
-WHERE t.id = ?
+SELECT SUM(a.Rent_Amount) AS total_rent
+FROM tenant_apartment_booking t
+JOIN apartment a ON t.Apartment_No = a.Apartment_No
+WHERE t.Tenant_ID = ?
 ";
 
 $stmt = $conn->prepare($sql);
@@ -27,7 +27,7 @@ $row = $res->fetch_assoc();
 $amount = $row['total_rent'] ?? 0;
 
 // ✅ UPI QR
-$upi_id = "yourupi@upi"; // change this
+$upi_id = "ramya@oksbi"; // change this
 $upi_link = "upi://pay?pa=$upi_id&pn=Apartment&am=$amount&cu=INR";
 $qr_url = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" . urlencode($upi_link);
 
