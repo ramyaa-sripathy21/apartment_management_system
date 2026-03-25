@@ -7,13 +7,12 @@ if (!isset($_SESSION['tenant_id'])) {
     exit();
 }
 
-$name = $_SESSION['tenant_name'] ?? 'Tenant';
+$name = $_SESSION['tenant_name'];
 $tenant_id = $_SESSION['tenant_id'];
 
 // AVAILABLE APARTMENTS
 $apartments = mysqli_query($conn, "
-SELECT * FROM apartments 
-WHERE status = 'available'
+SELECT * FROM apartments WHERE status='available'
 ");
 
 // BOOKED APARTMENT
@@ -31,174 +30,135 @@ WHERE t.id = $tenant_id
 <title>Tenant Dashboard</title>
 
 <style>
-body {
-    font-family: Segoe UI;
-    background: #f4f6f9;
-    margin: 0;
+body { display:flex; margin:0; font-family:Segoe UI; background:#f4f6f9; }
+
+/* SIDEBAR */
+.sidebar {
+    width:230px;
+    background:#1e1e2f;
+    color:#fff;
+    padding:20px;
+    height:100vh;
 }
 
-.header {
-    background: #1e1e2f;
-    color: white;
-    padding: 15px;
-    text-align: center;
+.sidebar h2 { margin-bottom:20px; }
+
+.sidebar a {
+    display:block;
+    color:#ccc;
+    margin:12px 0;
+    text-decoration:none;
 }
 
-.container {
-    padding: 30px;
+.sidebar a:hover { color:#fff; }
+
+/* MAIN */
+.main {
+    flex:1;
+    padding:30px;
 }
 
 .card {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 25px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    margin-bottom:25px;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
+/* TABLE */
+table { width:100%; border-collapse:collapse; }
+
+th,td {
+    padding:10px;
+    border-bottom:1px solid #ddd;
 }
 
-th, td {
-    padding: 12px;
-    border-bottom: 1px solid #ddd;
-    text-align: left;
-}
+th { background:#f1f1f1; }
 
-th {
-    background: #f1f1f1;
-}
-
+/* BUTTON */
 button {
-    padding: 8px 12px;
-    border: none;
-    background: #28a745;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
+    background:#28a745;
+    color:white;
+    border:none;
+    padding:6px 10px;
+    border-radius:5px;
 }
 
-button:hover {
-    opacity: 0.9;
-}
-
-.top-links {
-    margin-bottom: 20px;
-}
-
-/* Normal links */
-.top-links a {
-    margin-right: 15px;
-    text-decoration: none;
-    color: #2196F3;
-    font-weight: bold;
-}
-
-/* 🔴 LOGOUT BUTTON RED */
-.logout-btn {
-    background: red;
-    color: white !important;
-    padding: 6px 10px;
-    border-radius: 5px;
-}
-
-.logout-btn:hover {
-    background: darkred;
+/* LOGOUT */
+.logout {
+    color:red !important;
 }
 </style>
-
 </head>
 
 <body>
 
-<div class="header">
-    <h2>Welcome, <?php echo $name; ?></h2>
+<!-- SIDEBAR -->
+<div class="sidebar">
+<h2>Tenant Panel</h2>
+<a href="tenantDashboard.php">Dashboard</a>
+<a href="makePayment.php">Payments</a>
+<a href="maintenanceRequest.php">Maintenance</a>
+<a href="logout.php" class="logout">Logout</a>
 </div>
 
-<div class="container">
+<!-- MAIN -->
+<div class="main">
 
-<!-- LINKS -->
-<div class="top-links">
-    <a href="makePayment.php">💳 Make Payment</a>
-    <a href="maintenanceRequest.php">🛠 Maintenance</a>
-    <a href="logout.php" class="logout-btn">🚪 Logout</a>
-</div>
+<h2>Welcome, <?php echo $name; ?></h2>
 
-<!-- AVAILABLE APARTMENTS -->
+<!-- AVAILABLE -->
 <div class="card">
-    <h3>Available Apartments</h3>
+<h3>Available Apartments</h3>
 
-    <table>
-        <tr>
-            <th>Apartment No</th>
-            <th>Floor</th>
-            <th>Rent</th>
-            <th>Action</th>
-        </tr>
+<table>
+<tr>
+<th>Apartment No</th>
+<th>Floor</th>
+<th>Rent</th>
+<th>Action</th>
+</tr>
 
-        <?php 
-        if(mysqli_num_rows($apartments) > 0){
-            while($row = mysqli_fetch_assoc($apartments)) { 
-        ?>
-        <tr>
-            <td><?php echo $row['apartment_no']; ?></td>
-            <td><?php echo $row['floor']; ?></td>
-            <td>₹<?php echo $row['rent']; ?></td>
+<?php while($row = mysqli_fetch_assoc($apartments)) { ?>
+<tr>
+<td><?php echo $row['apartment_no']; ?></td>
+<td><?php echo $row['floor']; ?></td>
+<td>₹<?php echo $row['rent']; ?></td>
 
-            <td>
-                <form method="POST" action="bookApartment.php">
-                    <input type="hidden" name="apartment_id" value="<?php echo $row['id']; ?>">
-                    <button type="submit">Book</button>
-                </form>
-            </td>
-        </tr>
-        <?php 
-            } 
-        } else { 
-        ?>
-        <tr>
-            <td colspan="4" style="text-align:center;">No Available Apartments</td>
-        </tr>
-        <?php } ?>
+<td>
+<form method="POST" action="bookApartment.php">
+<input type="hidden" name="apartment_id" value="<?php echo $row['id']; ?>">
+<button>Book</button>
+</form>
+</td>
+</tr>
+<?php } ?>
 
-    </table>
+</table>
 </div>
 
-<!-- BOOKED APARTMENT -->
+<!-- BOOKED -->
 <div class="card">
-    <h3>Your Booked Apartment</h3>
+<h3>Your Apartment</h3>
 
-    <table>
-        <tr>
-            <th>Apartment No</th>
-            <th>Floor</th>
-            <th>Rent</th>
-        </tr>
+<table>
+<tr>
+<th>Apartment No</th>
+<th>Floor</th>
+<th>Rent</th>
+</tr>
 
-        <?php 
-        if(mysqli_num_rows($booked) > 0){
-            while($row = mysqli_fetch_assoc($booked)) { 
-        ?>
-        <tr>
-            <td><?php echo $row['apartment_no']; ?></td>
-            <td><?php echo $row['floor']; ?></td>
-            <td>₹<?php echo $row['rent']; ?></td>
-        </tr>
-        <?php 
-            } 
-        } else { 
-        ?>
-        <tr>
-            <td colspan="3" style="text-align:center;">No Apartment Booked</td>
-        </tr>
-        <?php } ?>
+<?php while($row = mysqli_fetch_assoc($booked)) { ?>
+<tr>
+<td><?php echo $row['apartment_no']; ?></td>
+<td><?php echo $row['floor']; ?></td>
+<td>₹<?php echo $row['rent']; ?></td>
+</tr>
+<?php } ?>
 
-    </table>
+</table>
 </div>
 
 </div>
-
 </body>
 </html>
