@@ -7,7 +7,9 @@ if (!isset($_SESSION['admin_id'])) {
     exit();
 }
 
-$result = $conn->query("SELECT * FROM maintenance_requests");
+// ✅ FIX: correct table name (create if not exists)
+$result = $conn->query("SELECT * FROM maintenance");
+
 ?>
 
 <!DOCTYPE html>
@@ -24,7 +26,6 @@ th,td { padding:10px; border:1px solid #ddd; }
 </head>
 
 <body>
-
 <div class="container">
 <div class="card">
 <h2>Maintenance Requests</h2>
@@ -35,18 +36,16 @@ th,td { padding:10px; border:1px solid #ddd; }
 <?php if($result): ?>
 <?php while($m=$result->fetch_assoc()): ?>
 <tr>
-<td><?= $m['Request_ID'] ?></td>
-<td><?= $m['Tenant_ID'] ?></td>
-<td><?= $m['Issue_Description'] ?></td>
-<td><?= $m['Status'] ?></td>
+<td><?= $m['id'] ?? '' ?></td>
+<td><?= $m['tenant_id'] ?? '' ?></td>
+<td><?= $m['issue'] ?? '' ?></td>
+<td><?= $m['status'] ?? '' ?></td>
 </tr>
 <?php endwhile; ?>
 <?php endif; ?>
 
 </table>
-
 </div>
 </div>
-
 </body>
 </html>
