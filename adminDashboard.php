@@ -1,59 +1,170 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-include 'db.php';
+// ===== DATABASE CONNECTION =====
+include("db.php");
 
-if (!isset($_SESSION['admin_id'])) {
-    header("Location: adminLogin.php");
-    exit();
-}
-
-// counts
-$a = $conn->query("SELECT COUNT(*) as c FROM apartment")->fetch_assoc()['c'];
-$t = $conn->query("SELECT COUNT(*) as c FROM tenant")->fetch_assoc()['c'];
-$p = $conn->query("SELECT COUNT(*) as c FROM Payments")->fetch_assoc()['c'];
-$m = $conn->query("SELECT COUNT(*) as c FROM maintenance")->fetch_assoc()['c'];
+// ===== FETCH COUNTS =====
+$apartments = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM apartments"));
+$tenants = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM tenants"));
+$payments = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM payments"));
+$maintenance = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM maintenance"));
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <title>Admin Dashboard</title>
+
 <style>
-body { font-family: Arial; margin:0; background:#1e3c72; color:white; }
-.sidebar {
-    width:250px; position:fixed; height:100%;
-    background:#222; padding:20px;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
 }
-.sidebar a { color:white; display:block; margin:15px 0; text-decoration:none; }
-.container { margin-left:260px; padding:20px; }
+
+/* Body */
+body {
+    display: flex;
+    background: #f4f6f9;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 230px;
+    height: 100vh;
+    background: #1e1e2f;
+    color: #fff;
+    padding: 20px;
+    position: fixed;
+}
+
+.sidebar h2 {
+    margin-bottom: 30px;
+}
+
+.sidebar a {
+    display: block;
+    color: #ccc;
+    text-decoration: none;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.sidebar a:hover {
+    background: #2f2f45;
+    color: #fff;
+}
+
+/* Main Content */
+.main {
+    margin-left: 230px;
+    padding: 30px;
+    width: 100%;
+}
+
+/* Header */
+.header {
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 25px;
+    color: #333;
+}
+
+/* Cards Grid */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 20px;
+}
+
+/* Card */
 .card {
-    background:linear-gradient(135deg,#43cea2,#185a9d);
-    padding:20px; border-radius:10px; margin:10px;
-    display:inline-block; width:250px; text-align:center;
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Card Text */
+.card h3 {
+    font-size: 16px;
+    color: #777;
+    margin-bottom: 10px;
+}
+
+.card p {
+    font-size: 30px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Colored Borders */
+.apartments { border-left: 6px solid #4CAF50; }
+.tenants { border-left: 6px solid #2196F3; }
+.payments { border-left: 6px solid #FF9800; }
+.maintenance { border-left: 6px solid #E91E63; }
+
+/* Responsive */
+@media(max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+    .main {
+        margin-left: 0;
+    }
 }
 </style>
 </head>
 
 <body>
 
+<!-- Sidebar -->
 <div class="sidebar">
-<h3>Admin</h3>
-<a href="apartments.php">Apartments</a>
-<a href="tenants.php">Tenants</a>
-<a href="payments.php">Payments</a>
-<a href="maintenance.php">Maintenance</a>
-<a href="logout.php">Logout</a>
+    <h2>Admin Panel</h2>
+    <a href="adminDashboard.php">Dashboard</a>
+    <a href="apartments.php">Apartments</a>
+    <a href="tenants.php">Tenants</a>
+    <a href="payments.php">Payments</a>
+    <a href="maintenance.php">Maintenance</a>
+    <a href="logout.php">Logout</a>
 </div>
 
-<div class="container">
-<h1>Welcome Admin</h1>
+<!-- Main Content -->
+<div class="main">
 
-<div class="card">Apartments<br><h2><?= $a ?></h2></div>
-<div class="card">Tenants<br><h2><?= $t ?></h2></div>
-<div class="card">Payments<br><h2><?= $p ?></h2></div>
-<div class="card">Maintenance<br><h2><?= $m ?></h2></div>
+    <div class="header">Welcome Admin 👋</div>
+
+    <div class="cards">
+
+        <div class="card apartments">
+            <h3>Total Apartments</h3>
+            <p><?php echo $apartments; ?></p>
+        </div>
+
+        <div class="card tenants">
+            <h3>Total Tenants</h3>
+            <p><?php echo $tenants; ?></p>
+        </div>
+
+        <div class="card payments">
+            <h3>Total Payments</h3>
+            <p><?php echo $payments; ?></p>
+        </div>
+
+        <div class="card maintenance">
+            <h3>Maintenance Requests</h3>
+            <p><?php echo $maintenance; ?></p>
+        </div>
+
+    </div>
 
 </div>
 
