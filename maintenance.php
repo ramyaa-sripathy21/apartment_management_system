@@ -5,14 +5,17 @@ include("db.php");
 if(isset($_GET['done'])){
     $id = $_GET['done'];
     mysqli_query($conn, "UPDATE maintenance SET status='Completed' WHERE id=$id");
-    echo "<script>alert('Marked as Completed'); window.location='maintenance.php';</script>";
+    header("Location: maintenance.php");
 }
 
-// FETCH MAINTENANCE WITH TENANT NAME
+// FETCH WITH TENANT NAME
 $result = mysqli_query($conn, "
-SELECT maintenance.*, tenants.name 
-FROM maintenance 
-LEFT JOIN tenants ON maintenance.tenant_id = tenants.id
+SELECT 
+    maintenance.*, 
+    tenants.name AS tenant_name
+FROM maintenance
+LEFT JOIN tenants 
+ON maintenance.tenant_id = tenants.id
 ");
 ?>
 
@@ -45,7 +48,6 @@ th,td { padding:10px; border-bottom:1px solid #ddd; }
 </div>
 
 <div class="main">
-
 <div class="card">
 <h2>Maintenance Requests</h2>
 
@@ -58,48 +60,28 @@ th,td { padding:10px; border-bottom:1px solid #ddd; }
 <th>Action</th>
 </tr>
 
-<?php 
-if(mysqli_num_rows($result) > 0){
-    while($row = mysqli_fetch_assoc($result)) { 
-?>
+<?php while($row = mysqli_fetch_assoc($result)) { ?>
 <tr>
 <td><?php echo $row['id']; ?></td>
 
 <td>
-<?php 
-echo !empty($row['name']) ? $row['name'] : 'Unknown'; 
-?>
+<?php echo !empty($row['tenant_name']) ? $row['tenant_name'] : 'Unknown'; ?>
 </td>
 
 <td><?php echo $row['issue']; ?></td>
-
-<td>
-<?php 
-echo $row['status']; 
-?>
-</td>
+<td><?php echo $row['status']; ?></td>
 
 <td>
 <?php if($row['status'] != 'Completed'){ ?>
-<a href="?done=<?php echo $row['id']; ?>" 
-onclick="return confirm('Mark as completed?')" 
-class="done-btn">Done</a>
+<a href="?done=<?php echo $row['id']; ?>" class="done-btn">Done</a>
 <?php } else { echo "✔"; } ?>
 </td>
 
-</tr>
-<?php 
-    } 
-} else {
-?>
-<tr>
-<td colspan="5" style="text-align:center;">No Maintenance Requests Found</td>
 </tr>
 <?php } ?>
 
 </table>
 </div>
-
 </div>
 
 </body>
