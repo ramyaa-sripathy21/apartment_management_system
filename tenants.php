@@ -1,10 +1,10 @@
 <?php
 include("db.php");
 
-// FETCH AVAILABLE APARTMENTS (FIXED)
+// FETCH AVAILABLE APARTMENTS
 $apartments = mysqli_query($conn, "
 SELECT * FROM apartments 
-WHERE LOWER(status) = 'available'
+WHERE status = 'available'
 ");
 
 // ADD TENANT
@@ -13,31 +13,44 @@ if(isset($_POST['addTenant'])){
     $contact = $_POST['contact'];
     $start = $_POST['start'];
     $end = $_POST['end'];
-    $apartment_id = $_POST['apartment_id'];
 
-    mysqli_query($conn, "INSERT INTO tenants (name, contact, start_date, end_date, apartment_id)
-    VALUES ('$name','$contact','$start','$end','$apartment_id')");
+    // ✅ SAFE FETCH
+    $apartment_id = isset($_POST['apartment_id']) ? $_POST['apartment_id'] : NULL;
 
-    mysqli_query($conn, "UPDATE apartments SET status='Occupied' WHERE id=$apartment_id");
+    if($apartment_id == NULL || $apartment_id == ""){
+        echo "<script>alert('Please select an apartment');</script>";
+    } else {
 
-    header("Location: tenants.php");
+        // INSERT TENANT
+        mysqli_query($conn, "INSERT INTO tenants (name, contact, start_date, end_date, apartment_id)
+        VALUES ('$name','$contact','$start','$end','$apartment_id')");
+
+        // MARK APARTMENT OCCUPIED
+        mysqli_query($conn, "UPDATE apartments SET status='occupied' WHERE id=$apartment_id");
+
+        echo "<script>alert('Tenant Added Successfully'); window.location='tenants.php';</script>";
+    }
 }
 
 // DROP TENANT
 if(isset($_GET['drop'])){
     $tenant_id = $_GET['drop'];
 
+    // GET APARTMENT ID
     $get = mysqli_query($conn, "SELECT apartment_id FROM tenants WHERE id=$tenant_id");
     $row = mysqli_fetch_assoc($get);
     $apartment_id = $row['apartment_id'];
 
-    mysqli_query($conn, "UPDATE apartments SET status='Available' WHERE id=$apartment_id");
+    // MAKE APARTMENT AVAILABLE AGAIN
+    mysqli_query($conn, "UPDATE apartments SET status='available' WHERE id=$apartment_id");
+
+    // DELETE TENANT
     mysqli_query($conn, "DELETE FROM tenants WHERE id=$tenant_id");
 
-    header("Location: tenants.php");
+    echo "<script>alert('Tenant Dropped'); window.location='tenants.php';</script>";
 }
 
-// FETCH TENANTS
+// FETCH TENANTS WITH APARTMENT NUMBER
 $result = mysqli_query($conn, "
 SELECT tenants.*, apartments.apartment_no 
 FROM tenants 
@@ -77,6 +90,7 @@ th,td { padding:10px; border-bottom:1px solid #ddd; }
 
 <div class="main">
 
+<!-- ADD TENANT -->
 <div class="card">
 <h2>Add Tenant</h2>
 
@@ -101,6 +115,7 @@ th,td { padding:10px; border-bottom:1px solid #ddd; }
 </form>
 </div>
 
+<!-- TENANTS LIST -->
 <div class="card">
 <h2>All Tenants</h2>
 
@@ -118,7 +133,15 @@ th,td { padding:10px; border-bottom:1px solid #ddd; }
 <tr>
 <td><?php echo $row['name']; ?></td>
 <td><?php echo $row['contact']; ?></td>
-<td><?php echo $row['apartment_no']; ?></td>
+
+<td>
+<?php 
+echo !empty($row['apartment_no']) 
+? $row['apartment_no'] 
+: 'Not Assigned'; 
+?>
+</td>
+
 <td><?php echo $row['start_date']; ?></td>
 <td><?php echo $row['end_date']; ?></td>
 
