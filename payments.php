@@ -7,212 +7,82 @@ if(isset($_GET['pay'])){
     mysqli_query($conn, "UPDATE payments SET status='Paid' WHERE id=$id");
 }
 
-// FETCH PAYMENTS
-$result = mysqli_query($conn, "SELECT * FROM payments");
+// FETCH PAYMENTS WITH TENANT NAME
+$result = mysqli_query($conn, "
+    SELECT payments.*, tenants.name 
+    FROM payments
+    LEFT JOIN tenants ON payments.tenant_id = tenants.id
+");
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
 <title>Payments</title>
-
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', sans-serif;
-}
-
-body {
-    display: flex;
-    background: #f4f6f9;
-}
-
-/* Sidebar */
-.sidebar {
-    width: 230px;
-    height: 100vh;
-    background: #1e1e2f;
-    color: #fff;
-    padding: 20px;
-    position: fixed;
-}
-
-.sidebar h2 {
-    margin-bottom: 30px;
-}
-
-.sidebar a {
-    display: block;
-    color: #ccc;
-    text-decoration: none;
-    padding: 12px;
-    margin: 10px 0;
-    border-radius: 8px;
-}
-
-.sidebar a:hover {
-    background: #2f2f45;
-    color: #fff;
-}
-
-/* Main */
-.main {
-    margin-left: 230px;
-    padding: 30px;
-    width: 100%;
-}
-
-/* Card */
-.card {
-    background: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-}
-
-/* Title */
-.title {
-    font-size: 22px;
-    margin-bottom: 20px;
-    color: #333;
-}
-
-/* Table */
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-table thead {
-    background: #f1f1f1;
-}
-
-table th, table td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-}
-
-table tr:hover {
-    background: #f9f9f9;
-}
-
-/* Status */
-.status {
-    padding: 5px 10px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 500;
-}
-
-.pending {
-    background: #fff3cd;
-    color: #856404;
-}
-
-.paid {
-    background: #d4edda;
-    color: #155724;
-}
-
-/* Button */
-.btn {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-    text-decoration: none;
-}
-
-.btn-pay {
-    background: #2196F3;
-    color: #fff;
-}
-
-.btn-pay:hover {
-    background: #1976D2;
-}
-
-/* Responsive */
-@media(max-width: 768px){
-    .sidebar {
-        display: none;
-    }
-    .main {
-        margin-left: 0;
-    }
-}
+body { display:flex; background:#f4f6f9; font-family:Segoe UI; }
+.sidebar { width:230px; background:#1e1e2f; color:#fff; padding:20px; height:100vh; }
+.sidebar a { display:block; color:#ccc; margin:10px 0; text-decoration:none; }
+.main { flex:1; padding:30px; }
+.card { background:#fff; padding:25px; border-radius:10px; }
+table { width:100%; border-collapse:collapse; }
+th,td { padding:12px; border-bottom:1px solid #ddd; }
+.status { padding:5px 10px; border-radius:6px; }
+.pending { background:#fff3cd; }
+.paid { background:#d4edda; }
+.btn { padding:6px 10px; background:#2196F3; color:#fff; text-decoration:none; border-radius:5px; }
 </style>
 </head>
-
 <body>
 
-<!-- Sidebar -->
 <div class="sidebar">
-    <h2>Admin Panel</h2>
-    <a href="adminDashboard.php">Dashboard</a>
-    <a href="apartments.php">Apartments</a>
-    <a href="tenants.php">Tenants</a>
-    <a href="payments.php">Payments</a>
-    <a href="maintenance.php">Maintenance</a>
-    <a href="logout.php">Logout</a>
+<h2>Admin Panel</h2>
+<a href="adminDashboard.php">Dashboard</a>
+<a href="apartments.php">Apartments</a>
+<a href="tenants.php">Tenants</a>
+<a href="payments.php">Payments</a>
+<a href="maintenance.php">Maintenance</a>
 </div>
 
-<!-- Main -->
 <div class="main">
+<div class="card">
+<h2>Payments</h2>
 
-    <div class="card">
-        <div class="title">Payments</div>
+<table>
+<tr>
+<th>ID</th>
+<th>Tenant</th>
+<th>Amount</th>
+<th>Date</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Tenant</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
+<?php while($row = mysqli_fetch_assoc($result)){ ?>
+<tr>
+<td><?php echo $row['id']; ?></td>
+<td><?php echo $row['name']; ?></td>
+<td>₹<?php echo $row['amount']; ?></td>
+<td><?php echo $row['date']; ?></td>
 
-            <tbody>
-                <?php while($row = mysqli_fetch_assoc($result)) { ?>
-                <tr>
-                    <td><?php echo $row['id']; ?></td>
-                    <td><?php echo $row['tenant_id']; ?></td>
-                    <td>₹<?php echo $row['amount']; ?></td>
-                    <td><?php echo $row['date']; ?></td>
+<td>
+<?php if($row['status']=='Pending'){ ?>
+<span class="status pending">Pending</span>
+<?php } else { ?>
+<span class="status paid">Paid</span>
+<?php } ?>
+</td>
 
-                    <td>
-                        <?php if($row['status'] == 'Pending'){ ?>
-                            <span class="status pending">Pending</span>
-                        <?php } else { ?>
-                            <span class="status paid">Paid</span>
-                        <?php } ?>
-                    </td>
+<td>
+<?php if($row['status']=='Pending'){ ?>
+<a href="?pay=<?php echo $row['id']; ?>" class="btn">Mark Paid</a>
+<?php } else { echo "✔"; } ?>
+</td>
+</tr>
+<?php } ?>
 
-                    <td>
-                        <?php if($row['status'] == 'Pending'){ ?>
-                            <a href="?pay=<?php echo $row['id']; ?>" class="btn btn-pay">
-                                Mark Paid
-                            </a>
-                        <?php } else { ?>
-                            ✔
-                        <?php } ?>
-                    </td>
-                </tr>
-                <?php } ?>
-            </tbody>
-
-        </table>
-    </div>
-
+</table>
 </div>
-
+</div>
 </body>
 </html>

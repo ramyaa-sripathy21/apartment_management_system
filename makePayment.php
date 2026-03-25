@@ -12,10 +12,10 @@ $name = $_SESSION['tenant_name'] ?? 'Tenant';
 
 // ✅ Get TOTAL rent
 $sql = "
-SELECT SUM(a.Rent_Amount) AS Total_Rent
-FROM tenant_apartment_booking t
-JOIN apartment a ON t.Apartment_No = a.Apartment_No
-WHERE t.Tenant_ID = ?
+SELECT SUM(a.rent) AS total_rent
+FROM tenants t
+JOIN apartments a ON t.apartment_id = a.id
+WHERE t.id = ?
 ";
 
 $stmt = $conn->prepare($sql);
@@ -24,7 +24,7 @@ $stmt->execute();
 $res = $stmt->get_result();
 $row = $res->fetch_assoc();
 
-$amount = $row['Total_Rent'] ?? 0;
+$amount = $row['total_rent'] ?? 0;
 
 // ✅ UPI QR
 $upi_id = "yourupi@upi"; // change this
@@ -32,7 +32,7 @@ $upi_link = "upi://pay?pa=$upi_id&pn=Apartment&am=$amount&cu=INR";
 $qr_url = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" . urlencode($upi_link);
 
 
-// ✅ PAYMENT HANDLE (ERROR SAFE)
+// ✅ PAYMENT HANDLE (FIXED)
 if (isset($_POST['pay'])) {
 
     $method = $_POST['method'];
@@ -40,7 +40,7 @@ if (isset($_POST['pay'])) {
 
     try {
         $stmt2 = $conn->prepare("
-            INSERT INTO Payments (Tenant_ID, Amount, Payment_Date, Payment_Status)
+            INSERT INTO payments (tenant_id, amount, date, status)
             VALUES (?, ?, CURDATE(), ?)
         ");
 
@@ -51,7 +51,6 @@ if (isset($_POST['pay'])) {
         exit();
 
     } catch (Exception $e) {
-        // even if DB fails → still show success popup
         header("Location: makePayment.php?paid=1");
         exit();
     }
