@@ -1,12 +1,13 @@
 <?php
 $host = "centerbeam.proxy.rlwy.net";
+$port = 38513;
 $user = "root";
-$pass = "DeKvUstBhzRMBiOdsJmbwCjjiUzIvpAb";
-$db   = "railway";
-$port = 58624;
+$password = "vZEXDTBzvlcomKzdICMhNCgJLRDoxDLV";
+$database = "railway";
 
-$conn = new mysqli($host, $user, $pass, $db, $port);
+$conn = new mysqli($host, $user, $password, $database, $port);
 
+// Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
