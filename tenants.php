@@ -2,8 +2,14 @@
 include("db.php");
 
 // FETCH AVAILABLE APARTMENTS
-$apartments = mysqli_query($conn, "SELECT * FROM apartments WHERE status='Available'");
-
+$apartments = mysqli_query($conn, "
+SELECT * FROM apartments 
+WHERE LOWER(status) = 'available'
+");
+while($row = mysqli_fetch_assoc($apartments)){
+    echo $row['apartment_no'] . "<br>";
+}
+exit();
 // ADD TENANT
 if(isset($_POST['addTenant'])){
     $name = $_POST['name'];
