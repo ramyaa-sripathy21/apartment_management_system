@@ -8,44 +8,65 @@ if (session_status() === PHP_SESSION_NONE) {
 
 include 'db.php';
 
+// Check login
 if (!isset($_SESSION['tenant_id'])) {
-    echo "Tenant not logged in!";
-    exit();
+    die("Tenant not logged in!");
 }
 
 $tenant_id = $_SESSION['tenant_id'];
 
-// Get tenant
-$result = $conn->query("SELECT * FROM Tenant WHERE Tenant_ID='$tenant_id'");
+// ✅ Get tenant details (FIXED lowercase table)
+$stmt = $conn->prepare("SELECT * FROM tenant WHERE Tenant_ID = ?");
+$stmt->bind_param("i", $tenant_id);
+$stmt->execute();
+$result = $stmt->get_result();
 $tenant = $result->fetch_assoc();
 
-// Get apartment booking
+if (!$tenant) {
+    die("Tenant not found!");
+}
+
+// ✅ Get latest booked apartment
 $sql = "
 SELECT a.Apartment_No, a.Rent_Amount
 FROM tenant_apartment_booking tab
 JOIN apartment a ON tab.Apartment_No = a.Apartment_No
-WHERE tab.Tenant_ID = '$tenant_id'
+WHERE tab.Tenant_ID = ?
 ORDER BY tab.Booking_Date DESC
 LIMIT 1
 ";
 
-$res = $conn->query($sql);
+$stmt2 = $conn->prepare($sql);
+$stmt2->bind_param("i", $tenant_id);
+$stmt2->execute();
+$res = $stmt2->get_result();
+
+$apartment = null;
 
 if ($res && $res->num_rows > 0) {
     $apartment = $res->fetch_assoc();
-} else {
-    $apartment = null;
 }
 
-// Payment submit
+// ✅ Handle payment
 if (isset($_POST['submit'])) {
+
     $amount = $_POST['amount'];
 
-    $conn->query("INSERT INTO Payments (Tenant_ID, Amount, Payment_Date, Payment_Status)
-VALUES ('$tenant_id', '$amount', CURDATE(), 'Pending')");
+    if (empty($amount)) {
+        $error = "Enter amount!";
+    } else {
 
-    header("Location: tenantDashboard.php");
-    exit();
+        $stmt3 = $conn->prepare("
+            INSERT INTO Payments (Tenant_ID, Amount, Payment_Date, Payment_Status)
+            VALUES (?, ?, CURDATE(), 'Pending')
+        ");
+
+        $stmt3->bind_param("id", $tenant_id, $amount);
+        $stmt3->execute();
+
+        header("Location: tenantDashboard.php");
+        exit();
+    }
 }
 ?>
 
@@ -53,6 +74,7 @@ VALUES ('$tenant_id', '$amount', CURDATE(), 'Pending')");
 <html>
 <head>
 <title>Make Payment</title>
+
 <style>
 body {
     font-family: Arial;
@@ -76,6 +98,9 @@ input {
     width: 100%;
     padding: 10px;
 }
+.error {
+    color: red;
+}
 </style>
 </head>
 
@@ -84,9 +109,10 @@ input {
 <div class="container">
     <h2>Make Payment</h2>
 
-    <p>Welcome, <?php echo $tenant['Name']; ?></p>
+    <p>Welcome, <strong><?php echo htmlspecialchars($tenant['Name']); ?></strong></p>
 
     <h3>Apartment Details</h3>
+
     <table border="1" width="100%">
         <tr>
             <th>Apartment No</th>
@@ -98,13 +124,19 @@ input {
         </tr>
     </table>
 
+    <br>
+
+    <?php if (!empty($error)) { ?>
+        <p class="error"><?php echo $error; ?></p>
+    <?php } ?>
+
     <form method="POST">
         <label>Amount:</label>
         <input type="number" name="amount"
         value="<?php echo $apartment ? $apartment['Rent_Amount'] : ''; ?>" required>
 
         <br><br>
-        <button name="submit">Pay</button>
+        <button type="submit" name="submit">Pay</button>
     </form>
 
     <br>
