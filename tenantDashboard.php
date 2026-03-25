@@ -1,105 +1,91 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
+session_start();
 include 'db.php';
 
-// Check if user is logged in
-if (!isset($_SESSION['tenant_id'])) { 
-    header("Location: login.php"); 
-    exit(); 
-} 
+if (!isset($_SESSION['tenant_id'])) {
+    header("Location: login.php");
+    exit();
+}
 
-$tenant_id = $_SESSION['tenant_id']; 
-$tenant_name = $_SESSION['tenant_name']; 
+$name = $_SESSION['tenant_name'] ?? 'Tenant';
 
-// Correct column name
-$sql_apartments = "SELECT * FROM Apartment WHERE Availability_Status = 'Available'"; 
-$apartments = $conn->query($sql_apartments); 
-?> 
+// fetch apartments
+$result = $conn->query("SELECT * FROM apartment WHERE Availability_Status='Available'");
+?>
 
-<!DOCTYPE html> 
-<html lang="en"> 
-<head>     
-    <meta charset="UTF-8">     
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">     
-    <title>Tenant Dashboard</title>     
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tenant Dashboard</title>
+<style>
+body { margin:0; font-family: 'Segoe UI'; background:#f4f7fc; }
 
-    <style>
-        body {
-            font-family: Arial;
-            margin: 0;
-            display: flex;
-        }
+.sidebar {
+    width:230px; height:100vh; position:fixed;
+    background:#2c3e50; color:white; padding:20px;
+}
+.sidebar h2 { margin-bottom:20px; }
+.sidebar a {
+    display:block; padding:10px; margin:8px 0;
+    color:white; text-decoration:none; border-radius:5px;
+}
+.sidebar a:hover { background:#34495e; }
 
-        .sidenav {
-            width: 220px;
-            background: #2c3e50;
-            height: 100vh;
-            color: white;
-            padding: 20px;
-        }
+.main { margin-left:250px; padding:20px; }
 
-        .sidenav a {
-            display: block;
-            padding: 10px;
-            color: white;
-            text-decoration: none;
-            margin-top: 10px;
-            background: #34495e;
-        }
+.card {
+    background:white; padding:20px; border-radius:10px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
 
-        .main {
-            flex: 1;
-            padding: 20px;
-        }
+table { width:100%; border-collapse:collapse; margin-top:10px; }
+th,td { padding:12px; border-bottom:1px solid #ddd; }
+th { background:#3498db; color:white; }
 
-        .card {
-            background: white;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 8px;
-        }
-
-        .btn {
-            background: blue;
-            color: white;
-            padding: 8px;
-            text-decoration: none;
-            display: inline-block;
-        }
-    </style>
+button {
+    background:#2ecc71; border:none; padding:8px 12px;
+    color:white; border-radius:5px; cursor:pointer;
+}
+</style>
 </head>
 
 <body>
 
-<div class="sidenav">
-    <h3><?php echo $tenant_name; ?></h3>
-    <a href="#">Apartments</a>
-    <a href="makePayment.php">Payment</a>
-    <a href="maintenanceRequest.php">Maintenance</a>
-    <a href="logout.php">Logout</a>
+<div class="sidebar">
+<h2><?= $name ?></h2>
+<a href="tenantDashboard.php">Apartments</a>
+<a href="makePayment.php">Payment</a>
+<a href="maintenanceRequest.php">Maintenance</a>
+<a href="logout.php">Logout</a>
 </div>
 
 <div class="main">
-    <h1>Welcome, <?php echo $tenant_name; ?></h1>
-    <h2>Available Apartments</h2>
 
-    <?php while ($row = $apartments->fetch_assoc()): ?>
-        <div class="card">
-            <h3><?php echo $row['Apartment_No']; ?></h3>
-            <p>Floor: <?php echo $row['Floor_No']; ?></p>
-            <p>Rent: ₹<?php echo $row['Rent_Amount']; ?></p>
+<h1>Welcome, <?= $name ?></h1>
 
-            <a class="btn" href="bookApartment.php?apartment_no=<?php echo $row['Apartment_No']; ?>">
-                Book Now
-            </a>
-        </div>
-    <?php endwhile; ?>
+<div class="card">
+<h3>Available Apartments</h3>
 
+<table>
+<tr><th>No</th><th>Floor</th><th>Rent</th><th>Action</th></tr>
+
+<?php while($row=$result->fetch_assoc()): ?>
+<tr>
+<td><?= $row['Apartment_No'] ?></td>
+<td><?= $row['Floor_No'] ?></td>
+<td>₹<?= $row['Rent_Amount'] ?></td>
+<td>
+<form method="POST" action="bookApartment.php">
+<input type="hidden" name="apartment_no" value="<?= $row['Apartment_No'] ?>">
+<button>Book</button>
+</form>
+</td>
+</tr>
+<?php endwhile; ?>
+
+</table>
 </div>
 
+</div>
 </body>
 </html>
-
