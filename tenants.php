@@ -1,19 +1,51 @@
 <?php
 include("db.php");
 
+// FETCH AVAILABLE APARTMENTS
+$apartments = mysqli_query($conn, "SELECT * FROM apartments WHERE status='Available'");
+
 // ADD TENANT
 if(isset($_POST['addTenant'])){
     $name = $_POST['name'];
     $contact = $_POST['contact'];
     $start = $_POST['start'];
     $end = $_POST['end'];
+    $apartment_id = $_POST['apartment_id'];
 
-    mysqli_query($conn, "INSERT INTO tenants (name, contact, start_date, end_date) 
-    VALUES ('$name','$contact','$start','$end')");
+    // INSERT TENANT
+    mysqli_query($conn, "INSERT INTO tenants (name, contact, start_date, end_date, apartment_id)
+    VALUES ('$name','$contact','$start','$end','$apartment_id')");
+
+    // UPDATE APARTMENT STATUS → Occupied
+    mysqli_query($conn, "UPDATE apartments SET status='Occupied' WHERE id=$apartment_id");
+
+    header("Location: tenants.php");
 }
 
-// FETCH TENANTS
-$result = mysqli_query($conn, "SELECT * FROM tenants");
+// DROP TENANT (FREE APARTMENT)
+if(isset($_GET['drop'])){
+    $tenant_id = $_GET['drop'];
+
+    // Get apartment_id
+    $get = mysqli_query($conn, "SELECT apartment_id FROM tenants WHERE id=$tenant_id");
+    $row = mysqli_fetch_assoc($get);
+    $apartment_id = $row['apartment_id'];
+
+    // Make apartment Available again
+    mysqli_query($conn, "UPDATE apartments SET status='Available' WHERE id=$apartment_id");
+
+    // Delete tenant (or keep if you want history)
+    mysqli_query($conn, "DELETE FROM tenants WHERE id=$tenant_id");
+
+    header("Location: tenants.php");
+}
+
+// FETCH TENANTS WITH APARTMENT
+$result = mysqli_query($conn, "
+    SELECT tenants.*, apartments.apartment_no 
+    FROM tenants 
+    LEFT JOIN apartments ON tenants.apartment_id = apartments.id
+");
 ?>
 
 <!DOCTYPE html>
@@ -91,15 +123,14 @@ body {
     margin-bottom: 15px;
 }
 
-input {
+input, select {
     width: 100%;
     padding: 12px;
     border-radius: 8px;
     border: 1px solid #ccc;
-    outline: none;
 }
 
-input:focus {
+input:focus, select:focus {
     border-color: #2196F3;
 }
 
@@ -113,7 +144,6 @@ button {
     border-radius: 8px;
     font-size: 16px;
     cursor: pointer;
-    transition: 0.3s;
 }
 
 button:hover {
@@ -132,22 +162,32 @@ table thead {
 
 table th, table td {
     padding: 12px;
-    text-align: left;
     border-bottom: 1px solid #ddd;
+    text-align: left;
 }
 
 table tr:hover {
     background: #f9f9f9;
 }
 
+/* Drop Button */
+.drop-btn {
+    color: #fff;
+    background: #e53935;
+    padding: 6px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.drop-btn:hover {
+    background: #c62828;
+}
+
 /* Responsive */
 @media(max-width: 768px){
-    .sidebar {
-        display: none;
-    }
-    .main {
-        margin-left: 0;
-    }
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
 }
 </style>
 </head>
@@ -173,6 +213,7 @@ table tr:hover {
         <div class="title">Add Tenant</div>
 
         <form method="POST">
+
             <div class="form-group">
                 <input type="text" name="name" placeholder="Tenant Name" required>
             </div>
@@ -189,6 +230,19 @@ table tr:hover {
                 <input type="date" name="end" required>
             </div>
 
+            <!-- Apartment Dropdown -->
+            <div class="form-group">
+                <select name="apartment_id" required>
+                    <option value="">Select Apartment</option>
+
+                    <?php while($row = mysqli_fetch_assoc($apartments)) { ?>
+                        <option value="<?php echo $row['id']; ?>">
+                            <?php echo $row['apartment_no']; ?>
+                        </option>
+                    <?php } ?>
+                </select>
+            </div>
+
             <button type="submit" name="addTenant">Add Tenant</button>
         </form>
     </div>
@@ -202,8 +256,10 @@ table tr:hover {
                 <tr>
                     <th>Name</th>
                     <th>Contact</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
+                    <th>Apartment</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Action</th>
                 </tr>
             </thead>
 
@@ -212,8 +268,17 @@ table tr:hover {
                 <tr>
                     <td><?php echo $row['name']; ?></td>
                     <td><?php echo $row['contact']; ?></td>
+                    <td><?php echo $row['apartment_no']; ?></td>
                     <td><?php echo $row['start_date']; ?></td>
                     <td><?php echo $row['end_date']; ?></td>
+
+                    <td>
+                        <a href="?drop=<?php echo $row['id']; ?>" 
+                           onclick="return confirm('Vacate this apartment?')" 
+                           class="drop-btn">
+                           Drop
+                        </a>
+                    </td>
                 </tr>
                 <?php } ?>
             </tbody>
