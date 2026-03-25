@@ -2,147 +2,67 @@
 session_start();
 include 'db.php';
 
-// Check admin login
 if (!isset($_SESSION['admin_id'])) {
     header("Location: adminLogin.php");
     exit();
 }
 
-// Add tenant
-if (isset($_POST['add_tenant'])) {
+$result = $conn->query("SELECT * FROM tenant");
 
-    $name = $_POST['name'];
-    $contact = $_POST['contact_info'];
-    $start = $_POST['lease_start'];
-    $end = $_POST['lease_end'];
-
-    // Validation
-    if (empty($name) || empty($contact) || empty($start) || empty($end)) {
-        die("All fields are required!");
-    }
-
-    $sql = "INSERT INTO tenant 
-    (Name, Contact_Info, Lease_Start_Date, Lease_End_Date)
-    VALUES ('$name','$contact','$start','$end')";
-
-    if (!$conn->query($sql)) {
-        die("Error: " . $conn->error);
-    }
-
+if (isset($_POST['add'])) {
+    $stmt = $conn->prepare("INSERT INTO tenant (Name, Contact, Lease_Start_Date, Lease_End_Date) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("ssss", $_POST['name'], $_POST['contact'], $_POST['start'], $_POST['end']);
+    $stmt->execute();
     header("Location: tenants.php");
     exit();
 }
-
-// Fetch tenants
-$result = $conn->query("SELECT * FROM tenant");
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Manage Tenants</title>
-
-    <style>
-    body {
-        font-family: Arial;
-        background: #f4f6f9;
-        margin: 0;
-    }
-
-    .container {
-        width: 80%;
-        margin: 40px auto;
-        background: white;
-        padding: 25px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    h2 {
-        text-align: center;
-        color: #333;
-    }
-
-    form {
-        margin-bottom: 20px;
-    }
-
-    input {
-        padding: 10px;
-        margin: 5px;
-        width: 200px;
-    }
-
-    button {
-        padding: 10px 15px;
-        background: #007bff;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    button:hover {
-        background: #0056b3;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-
-    th, td {
-        padding: 12px;
-        border: 1px solid #ddd;
-        text-align: center;
-    }
-
-    th {
-        background: #007bff;
-        color: white;
-    }
-
-    tr:nth-child(even) {
-        background: #f2f2f2;
-    }
-    </style>
+<title>Tenants</title>
+<style>
+body { font-family: Arial; background:#f4f7fc; }
+.container { margin-left:260px; padding:20px; }
+.card { background:white; padding:20px; border-radius:10px; margin-bottom:20px; }
+input { width:100%; padding:10px; margin:8px 0; }
+button { padding:10px; background:green; color:white; border:none; width:100%; }
+table { width:100%; border-collapse:collapse; }
+th,td { padding:10px; border:1px solid #ddd; }
+</style>
 </head>
 
 <body>
 
 <div class="container">
 
-    <h2>Manage Tenants</h2>
-
-    <form method="POST">
-        <input type="text" name="name" placeholder="Tenant Name" required>
-        <input type="text" name="contact_info" placeholder="Contact Info" required>
-        <input type="date" name="lease_start" required>
-        <input type="date" name="lease_end" required>
-        <button type="submit" name="add_tenant">Add Tenant</button>
-    </form>
-
-    <table>
-        <tr>
-            <th>Name</th>
-            <th>Contact</th>
-            <th>Lease Start</th>
-            <th>Lease End</th>
-        </tr>
-
-        <?php while($row = $result->fetch_assoc()): ?>
-        <tr>
-            <td><?php echo $row['Name']; ?></td>
-            <td><?php echo $row['Contact_Info']; ?></td>
-            <td><?php echo $row['Lease_Start_Date']; ?></td>
-            <td><?php echo $row['Lease_End_Date']; ?></td>
-        </tr>
-        <?php endwhile; ?>
-
-    </table>
-
+<div class="card">
+<h2>Add Tenant</h2>
+<form method="POST">
+<input name="name" placeholder="Name" required>
+<input name="contact" placeholder="Contact" required>
+<input name="start" type="date" required>
+<input name="end" type="date" required>
+<button name="add">Add Tenant</button>
+</form>
 </div>
 
+<div class="card">
+<h2>All Tenants</h2>
+<table>
+<tr><th>Name</th><th>Contact</th><th>Start</th><th>End</th></tr>
+<?php while($t=$result->fetch_assoc()): ?>
+<tr>
+<td><?= $t['Name'] ?></td>
+<td><?= $t['Contact'] ?></td>
+<td><?= $t['Lease_Start_Date'] ?></td>
+<td><?= $t['Lease_End_Date'] ?></td>
+</tr>
+<?php endwhile; ?>
+</table>
+</div>
+
+</div>
 </body>
 </html>

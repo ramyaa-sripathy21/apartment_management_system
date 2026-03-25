@@ -1,36 +1,20 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
+session_start();
 include 'db.php';
 
-// Check admin login
 if (!isset($_SESSION['admin_id'])) {
     header("Location: adminLogin.php");
     exit();
 }
 
-// Fetch apartments (FIXED lowercase)
-$sql = "SELECT * FROM apartment";
-$apartments = $conn->query($sql);
+$result = $conn->query("SELECT * FROM apartment");
 
-// Handle add apartment
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_apartment'])) {
-
-    $apartment_no = $_POST['apartment_no'];
-    $floor_no = $_POST['floor_no'];
-    $rent_amount = $_POST['rent_amount'];
-    $availability_status = $_POST['availability_status'];
-
+if (isset($_POST['add_apartment'])) {
     $stmt = $conn->prepare("INSERT INTO apartment (Apartment_No, Floor_No, Rent_Amount, Availability_Status) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("sids", $apartment_no, $floor_no, $rent_amount, $availability_status);
-
-    if ($stmt->execute()) {
-        $message = "Apartment added successfully!";
-    } else {
-        $message = "Error: " . $conn->error;
-    }
+    $stmt->bind_param("sids", $_POST['apartment_no'], $_POST['floor_no'], $_POST['rent_amount'], $_POST['availability_status']);
+    $stmt->execute();
+    header("Location: apartments.php");
+    exit();
 }
 ?>
 
@@ -38,89 +22,65 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_apartment'])) {
 <html>
 <head>
 <title>Manage Apartments</title>
-
 <style>
-body { font-family: Arial; background: #f4f7fc; }
-.container { margin-left: 260px; padding: 20px; }
+body { font-family: Arial; background:#f4f7fc; }
+.container { margin-left:260px; padding:20px; }
 .sidebar {
-    width: 250px;
-    position: fixed;
-    height: 100%;
-    background: #333;
-    color: white;
-    padding: 20px;
+    width:250px; position:fixed; height:100%;
+    background:#333; color:white; padding:20px;
 }
-.sidebar a { color: white; display: block; margin: 10px 0; text-decoration: none; }
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: 10px; border: 1px solid #ddd; }
-button { padding: 10px; background: blue; color: white; border: none; }
-.form-box { display: none; margin-top: 20px; }
+.sidebar a { color:white; display:block; margin:10px 0; text-decoration:none; }
+.card { background:white; padding:20px; border-radius:10px; margin-bottom:20px; }
+input, select { width:100%; padding:10px; margin:8px 0; }
+button { padding:10px; background:blue; color:white; border:none; width:100%; }
+table { width:100%; border-collapse:collapse; }
+th,td { padding:10px; border:1px solid #ddd; }
 </style>
-
 </head>
+
 <body>
 
 <div class="sidebar">
-    <h3>Admin Panel</h3>
-    <a href="adminDashboard.php">Dashboard</a>
-    <a href="apartments.php">Apartments</a>
-    <a href="tenants.php">Tenants</a>
-    <a href="payments.php">Payments</a>
-    <a href="logout.php">Logout</a>
+<h3>Admin</h3>
+<a href="adminDashboard.php">Dashboard</a>
+<a href="apartments.php">Apartments</a>
+<a href="tenants.php">Tenants</a>
+<a href="payments.php">Payments</a>
+<a href="maintenance.php">Maintenance</a>
+<a href="logout.php">Logout</a>
 </div>
 
 <div class="container">
 
-<h2>Manage Apartments</h2>
-
-<?php if (isset($message)) echo "<p>$message</p>"; ?>
-
-<button onclick="toggleForm()">Add Apartment</button>
-
-<div class="form-box" id="formBox">
+<div class="card">
+<h2>Add Apartment</h2>
 <form method="POST">
-    <input type="text" name="apartment_no" placeholder="Apartment No" required><br><br>
-    <input type="number" name="floor_no" placeholder="Floor No" required><br><br>
-    <input type="number" name="rent_amount" placeholder="Rent" required><br><br>
-
-    <select name="availability_status">
-        <option value="Available">Available</option>
-        <option value="Occupied">Occupied</option>
-    </select><br><br>
-
-    <button type="submit" name="add_apartment">Add</button>
+<input name="apartment_no" placeholder="Apartment No" required>
+<input name="floor_no" type="number" placeholder="Floor" required>
+<input name="rent_amount" type="number" placeholder="Rent" required>
+<select name="availability_status">
+<option>Available</option>
+<option>Occupied</option>
+</select>
+<button name="add_apartment">Add Apartment</button>
 </form>
 </div>
 
-<br>
-
+<div class="card">
+<h2>All Apartments</h2>
 <table>
+<tr><th>No</th><th>Floor</th><th>Rent</th><th>Status</th></tr>
+<?php while($row=$result->fetch_assoc()): ?>
 <tr>
-    <th>Apartment No</th>
-    <th>Floor</th>
-    <th>Rent</th>
-    <th>Status</th>
-</tr>
-
-<?php while($row = $apartments->fetch_assoc()): ?>
-<tr>
-    <td><?php echo $row['Apartment_No']; ?></td>
-    <td><?php echo $row['Floor_No']; ?></td>
-    <td><?php echo $row['Rent_Amount']; ?></td>
-    <td><?php echo $row['Availability_Status']; ?></td>
+<td><?= $row['Apartment_No'] ?></td>
+<td><?= $row['Floor_No'] ?></td>
+<td><?= $row['Rent_Amount'] ?></td>
+<td><?= $row['Availability_Status'] ?></td>
 </tr>
 <?php endwhile; ?>
-
 </table>
-
 </div>
 
-<script>
-function toggleForm() {
-    var f = document.getElementById("formBox");
-    f.style.display = (f.style.display === "block") ? "none" : "block";
-}
-</script>
-
+</div>
 </body>
 </html>
