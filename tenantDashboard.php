@@ -9,7 +9,7 @@ if (!isset($_SESSION['tenant_id'])) {
 
 $name = $_SESSION['tenant_name'] ?? 'Tenant';
 
-// fetch apartments
+// available apartments
 $result = $conn->query("SELECT * FROM apartment WHERE Availability_Status='Available'");
 ?>
 
@@ -17,17 +17,16 @@ $result = $conn->query("SELECT * FROM apartment WHERE Availability_Status='Avail
 <html>
 <head>
 <title>Tenant Dashboard</title>
-<style>
-body { margin:0; font-family: 'Segoe UI'; background:#f4f7fc; }
 
+<style>
+body { margin:0; font-family:Segoe UI; background:#f4f7fc; }
 .sidebar {
     width:230px; height:100vh; position:fixed;
     background:#2c3e50; color:white; padding:20px;
 }
-.sidebar h2 { margin-bottom:20px; }
 .sidebar a {
     display:block; padding:10px; margin:8px 0;
-    color:white; text-decoration:none; border-radius:5px;
+    color:white; text-decoration:none;
 }
 .sidebar a:hover { background:#34495e; }
 
@@ -35,20 +34,19 @@ body { margin:0; font-family: 'Segoe UI'; background:#f4f7fc; }
 
 .card {
     background:white; padding:20px; border-radius:10px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
-table { width:100%; border-collapse:collapse; margin-top:10px; }
+table { width:100%; border-collapse:collapse; }
 th,td { padding:12px; border-bottom:1px solid #ddd; }
 th { background:#3498db; color:white; }
 
 button {
-    background:#2ecc71; border:none; padding:8px 12px;
-    color:white; border-radius:5px; cursor:pointer;
+    background:#2ecc71; color:white;
+    border:none; padding:8px 12px;
 }
 </style>
-</head>
 
+</head>
 <body>
 
 <div class="sidebar">
@@ -60,6 +58,14 @@ button {
 </div>
 
 <div class="main">
+
+<?php if (isset($_GET['booked'])): ?>
+<script>alert("✅ Apartment booked successfully!");</script>
+<?php endif; ?>
+
+<?php if (isset($_GET['already'])): ?>
+<script>alert("⚠️ You already booked an apartment!");</script>
+<?php endif; ?>
 
 <h1>Welcome, <?= $name ?></h1>
 
@@ -77,7 +83,7 @@ button {
 <td>
 <form method="POST" action="bookApartment.php">
 <input type="hidden" name="apartment_no" value="<?= $row['Apartment_No'] ?>">
-<button>Book</button>
+<button type="submit">Book</button>
 </form>
 </td>
 </tr>
