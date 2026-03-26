@@ -14,7 +14,8 @@ FROM payments p
 LEFT JOIN Tenant t 
 ON p.tenant_id = t.Tenant_ID
 ORDER BY p.id DESC
-"); ?>
+");
+?>
 
 <!DOCTYPE html>
 <html>
@@ -29,7 +30,6 @@ body {
     background: #f4f6f9;
 }
 
-/* Sidebar */
 .sidebar {
     width: 230px;
     background: #1e1e2f;
@@ -52,21 +52,17 @@ body {
     color: white;
 }
 
-/* Logout button */
 .logout-btn {
     margin-top: 30px;
-    background: #333;
     text-align: center;
     color: white !important;
 }
 
-/* Main */
 .main {
     flex: 1;
     padding: 30px;
 }
 
-/* Card */
 .card {
     background: #fff;
     padding: 25px;
@@ -74,7 +70,6 @@ body {
     box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
 }
 
-/* Table */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -91,7 +86,6 @@ td {
     border-bottom: 1px solid #ddd;
 }
 
-/* Status */
 .status {
     padding: 6px 12px;
     border-radius: 6px;
@@ -113,7 +107,6 @@ td {
 <a href="tenants.php">Tenants</a>
 <a href="payments.php">Payments</a>
 <a href="maintenance.php">Maintenance</a>
-
 <a href="logout.php" class="logout-btn">Logout</a>
 </div>
 
@@ -140,9 +133,9 @@ td {
 <?= !empty($row['tenant_name']) ? $row['tenant_name'] : 'Unknown' ?>
 </td>
 
-<td>₹<?= number_format($row['amount'] ?? 0, 2) ?>
-<?= $row['date'] ?? 'N/A' ?>
-<?= $row['status'] ?? 'Pending' ?>
+<td>₹<?= number_format($row['amount'], 2) ?></td>
+
+<td><?= $row['date'] ?></td>
 
 <td>
 <?php

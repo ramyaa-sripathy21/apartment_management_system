@@ -6,55 +6,44 @@ if (!isset($_SESSION['tenant_id'])) {
     header("Location: login.php");
     exit();
 }
+
 $tenant_id = $_SESSION['tenant_id'];
 
+// ✅ Fetch tenant name
 $nameQuery = mysqli_query($conn, "SELECT Name FROM Tenant WHERE Tenant_ID='$tenant_id'");
 $data = mysqli_fetch_assoc($nameQuery);
-
 $name = $data['Name'] ?? 'Tenant';
 
-$sql = "
-SELECT SUM(rent) AS total_rent
-FROM apartments
-WHERE tenant_id = '$tenant_id'
-";
-
+// ✅ Fetch rent
+$sql = "SELECT SUM(rent) AS total_rent FROM apartments WHERE tenant_id = '$tenant_id'";
 $result = mysqli_query($conn, $sql);
+$row = mysqli_fetch_assoc($result);
 
-if ($row = mysqli_fetch_assoc($result)) {
-    $rent = $row['total_rent'] ?? 0;
-} else {
-    $rent = 0;
-}
+$rent = $row['total_rent'] ?? 0;
 
-/* ✅ UPI QR */
-$upi_id = "ramya@oksbi"; // change if needed
+// ✅ UPI QR
+$upi_id = "ramya@oksbi";
 $upi_link = "upi://pay?pa=$upi_id&pn=Apartment&am=$rent&cu=INR";
 $qr_url = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" . urlencode($upi_link);
 
-
-/* ✅ PAYMENT HANDLE */
+// ✅ PAYMENT HANDLE
 if (isset($_POST['pay'])) {
 
     $method = $_POST['method'];
     $status = "Paid via " . $method;
 
-    try {
-        $stmt = $conn->prepare("
-            INSERT INTO payments (tenant_id, amount, date, status)
+    $amount = $rent; // ✅ FIXED (IMPORTANT)
+
+    $stmt = $conn->prepare("
+        INSERT INTO payments (tenant_id, amount, date, status)
         VALUES (?, ?, CURDATE(), ?)
-        ");
+    ");
 
-        $stmt->bind_param("ids", $tenant_id, $amount, $status);
-        $stmt->execute();
+    $stmt->bind_param("ids", $tenant_id, $amount, $status);
+    $stmt->execute();
 
-        header("Location: makePayment.php?paid=1");
-        exit();
-
-    } catch (Exception $e) {
-        header("Location: makePayment.php?paid=1");
-        exit();
-    }
+    header("Location: makePayment.php?paid=1");
+    exit();
 }
 ?>
 
@@ -81,18 +70,10 @@ body {
     box-shadow: 0px 5px 15px rgba(0,0,0,0.1);
 }
 
-h2 {
-    margin-bottom: 10px;
-}
-
 .amount {
     font-size: 22px;
     color: #2ecc71;
     font-weight: bold;
-}
-
-img {
-    margin: 15px 0;
 }
 
 button {
@@ -114,14 +95,13 @@ button:hover {
     opacity: 0.9;
 }
 </style>
-
 </head>
 
 <body>
 
 <div class="container">
 
-<!-- ✅ SUCCESS POPUP -->
+<!-- ✅ POPUP -->
 <?php if (isset($_GET['paid'])): ?>
 <script>
 alert("✅ Payment Successful!");
@@ -135,7 +115,6 @@ alert("✅ Payment Successful!");
 <p>Total Rent:</p>
 <div class="amount">₹<?= $rent ?></div>
 
-<!-- QR -->
 <img src="<?= $qr_url ?>" alt="QR Code">
 
 <form method="POST">
