@@ -1,21 +1,18 @@
 <?php
+session_start();
 include("db.php");
 
-// MARK AS DONE
-if(isset($_GET['done'])){
-    $id = $_GET['done'];
-    mysqli_query($conn, "UPDATE maintenance SET status='Completed' WHERE id=$id");
-    header("Location: maintenance.php");
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: adminLogin.php");
+    exit();
 }
 
-// FETCH WITH TENANT NAME
+/* ✅ FETCH MAINTENANCE WITH TENANT NAME */
 $result = mysqli_query($conn, "
-SELECT 
-    maintenance.*, 
-    tenants.name AS tenant_name
-FROM maintenance
-LEFT JOIN tenants 
-ON maintenance.tenant_id = tenants.id
+SELECT m.*, t.Name AS tenant_name
+FROM Maintenance m
+LEFT JOIN Tenant t ON m.Tenant_ID = t.Tenant_ID
+ORDER BY m.Request_ID DESC
 ");
 ?>
 
@@ -25,31 +22,133 @@ ON maintenance.tenant_id = tenants.id
 <title>Maintenance</title>
 
 <style>
-body { display:flex; background:#f4f6f9; font-family:Segoe UI; }
-.sidebar { width:230px; background:#1e1e2f; color:#fff; padding:20px; height:100vh; }
-.sidebar a { display:block; color:#ccc; margin:10px 0; text-decoration:none; }
-.main { flex:1; padding:30px; }
-.card { background:#fff; padding:25px; border-radius:10px; }
-table { width:100%; border-collapse:collapse; }
-th,td { padding:10px; border-bottom:1px solid #ddd; }
-.done-btn { background:green; color:#fff; padding:5px 8px; text-decoration:none; }
+body {
+    margin: 0;
+    display: flex;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f4f6f9;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 230px;
+    background: #1e1e2f;
+    color: #fff;
+    height: 100vh;
+    padding: 20px;
+}
+
+.sidebar h2 {
+    margin-bottom: 20px;
+}
+
+.sidebar a {
+    display: block;
+    color: #ccc;
+    padding: 10px;
+    margin-bottom: 5px;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.sidebar a:hover {
+    background: #333;
+    color: #fff;
+}
+
+.logout-btn {
+    display: block;
+    margin-top: 30px;
+    padding: 10px;
+    background: #e74c3c;
+    color: white;
+    text-align: center;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.logout-btn:hover {
+    background: #c0392b;
+}
+
+/* Main */
+.main {
+    flex: 1;
+    padding: 30px;
+}
+
+/* Card */
+.card {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
+}
+
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+}
+
+th {
+    background: #f1f1f1;
+}
+
+tr:hover {
+    background: #f9f9f9;
+}
+
+/* Status */
+.pending {
+    color: orange;
+    font-weight: bold;
+}
+
+.done {
+    color: green;
+    font-weight: bold;
+}
+
+/* Button */
+.btn {
+    padding: 6px 12px;
+    background: green;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
 </style>
 </head>
 
 <body>
 
+<!-- Sidebar -->
 <div class="sidebar">
-<h2>Admin Panel</h2>
-<a href="adminDashboard.php">Dashboard</a>
-<a href="apartments.php">Apartments</a>
-<a href="tenants.php">Tenants</a>
-<a href="payments.php">Payments</a>
-<a href="maintenance.php">Maintenance</a>
+    <h2>Admin Panel</h2>
+    <a href="adminDashboard.php">Dashboard</a>
+    <a href="apartments.php">Apartments</a>
+    <a href="tenants.php">Tenants</a>
+    <a href="payments.php">Payments</a>
+    <a href="maintenance.php">Maintenance</a>
+    <a href="logout.php" class="logout">Logout</a>
 </div>
 
+<!-- Main -->
 <div class="main">
 <div class="card">
-<h2>Maintenance Requests</h2>
+<h2>🛠 Maintenance Requests</h2>
 
 <table>
 <tr>
@@ -62,25 +161,39 @@ th,td { padding:10px; border-bottom:1px solid #ddd; }
 
 <?php while($row = mysqli_fetch_assoc($result)) { ?>
 <tr>
-<td><?php echo $row['id']; ?></td>
+
+<td><?= $row['Request_ID'] ?></td>
 
 <td>
-<?php echo !empty($row['tenant_name']) ? $row['tenant_name'] : 'Unknown'; ?>
+<?= !empty($row['tenant_name']) ? $row['tenant_name'] : 'Unknown' ?>
 </td>
 
-<td><?php echo $row['issue']; ?></td>
-<td><?php echo $row['status']; ?></td>
+<td><?= $row['Issue_Description'] ?></td>
 
 <td>
-<?php if($row['status'] != 'Completed'){ ?>
-<a href="?done=<?php echo $row['id']; ?>" class="done-btn">Done</a>
-<?php } else { echo "✔"; } ?>
+<?php if ($row['Status'] == 'Pending') { ?>
+    <span class="pending">Pending</span>
+<?php } else { ?>
+    <span class="done">Completed</span>
+<?php } ?>
+</td>
+
+<td>
+<?php if ($row['Status'] == 'Pending') { ?>
+    <form method="POST" action="updateMaintenance.php">
+        <input type="hidden" name="id" value="<?= $row['Request_ID'] ?>">
+        <button class="btn">Done</button>
+    </form>
+<?php } else { ?>
+    ✔
+<?php } ?>
 </td>
 
 </tr>
 <?php } ?>
 
 </table>
+
 </div>
 </div>
 
