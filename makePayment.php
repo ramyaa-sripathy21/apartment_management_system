@@ -8,12 +8,12 @@ if (!isset($_SESSION['tenant_id'])) {
 }
 
 $tenant_id = $_SESSION['tenant_id'];
-$name = $_SESSION['tenant_name'] ?? 'Tenant';
 
 $sql = "
-SELECT Rent_Amount 
-FROM Apartment 
-WHERE tenant_id = '$tenant_id'
+SELECT a.Rent_Amount 
+FROM Apartment a
+JOIN Tenant t ON t.Apartment_No = a.Apartment_No
+WHERE t.Tenant_ID = '$tenant_id'
 ";
 
 $result = mysqli_query($conn, $sql);
