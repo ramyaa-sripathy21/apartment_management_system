@@ -3,46 +3,41 @@ session_start();
 include 'db.php';
 
 if (!isset($_SESSION['tenant_id'])) {
-    die("Session error: tenant not logged in");
+    header("Location: login.php");
+    exit();
 }
 
 $tenant_id = $_SESSION['tenant_id'];
 
-if (!isset($_POST['apartment_no'])) {
-    die("Error: apartment not selected");
+/* -------- CHECK INPUT -------- */
+if (!isset($_POST['apartment_no']) || empty($_POST['apartment_no'])) {
+    echo "<script>alert('Error: Apartment not selected'); window.location='tenantDashboard.php';</script>";
+    exit();
 }
 
 $apartment_no = $_POST['apartment_no'];
 
-// DEBUG (REMOVE AFTER TEST)
-echo "Tenant: $tenant_id | Apartment: $apartment_no <br>";
-
-// INSERT BOOKING
-$stmt = $conn->prepare("
-    INSERT INTO tenant_apartment_booking (Tenant_ID, Apartment_No, Booking_Date)
-    VALUES (?, ?, CURDATE())
-");
-
-if(!$stmt){
-    die("Prepare failed: " . $conn->error);
+/* -------- CHECK IF ALREADY BOOKED -------- */
+$check = mysqli_query($conn, "SELECT * FROM apartments WHERE tenant_id='$tenant_id'");
+if (mysqli_num_rows($check) > 0) {
+    echo "<script>alert('You already booked an apartment!'); window.location='tenantDashboard.php';</script>";
+    exit();
 }
 
-$stmt->bind_param("is", $tenant_id, $apartment_no);
+/* -------- BOOK APARTMENT -------- */
+$update = "UPDATE apartments 
+           SET tenant_id='$tenant_id', status='occupied' 
+           WHERE apartment_no='$apartment_no'";
 
-if(!$stmt->execute()){
-    die("Insert failed: " . $stmt->error);
+if (mysqli_query($conn, $update)) {
+    echo "<script>
+        alert('Apartment booked successfully!');
+        window.location='tenantDashboard.php';
+    </script>";
+} else {
+    echo "<script>
+        alert('Booking failed!');
+        window.location='tenantDashboard.php';
+    </script>";
 }
-
-// UPDATE STATUS
-$stmt2 = $conn->prepare("
-    UPDATE apartment 
-    SET Availability_Status='Occupied' 
-    WHERE Apartment_No=?
-");
-
-$stmt2->bind_param("s", $apartment_no);
-$stmt2->execute();
-
-echo "Booking successful!";
-exit();
 ?>
