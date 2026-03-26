@@ -1,16 +1,18 @@
 <?php
-session_start();
 include("db.php");
 
-/* ✅ FETCH PAYMENTS WITH TENANT NAME (FIXED JOIN) */
+// ✅ FETCH PAYMENTS + TENANT NAME
 $result = mysqli_query($conn, "
 SELECT 
-    p.*, 
-    t.Name AS tenant_name
-FROM Payment p
-LEFT JOIN Tenant t 
-ON p.Tenant_ID = t.Tenant_ID
-ORDER BY p.Payment_Date DESC
+    p.id,
+    p.amount,
+    p.date,
+    p.status,
+    t.name AS tenant_name
+FROM payments p
+LEFT JOIN tenants t 
+ON p.tenant_id = t.id
+ORDER BY p.id DESC
 ");
 ?>
 
@@ -21,10 +23,10 @@ ORDER BY p.Payment_Date DESC
 
 <style>
 body {
-    margin: 0;
     display: flex;
+    margin: 0;
+    font-family: Segoe UI;
     background: #f4f6f9;
-    font-family: 'Segoe UI', sans-serif;
 }
 
 /* Sidebar */
@@ -34,10 +36,6 @@ body {
     color: #fff;
     padding: 20px;
     height: 100vh;
-}
-
-.sidebar h2 {
-    margin-bottom: 20px;
 }
 
 .sidebar a {
@@ -51,7 +49,15 @@ body {
 
 .sidebar a:hover {
     background: #333;
-    color: #fff;
+    color: white;
+}
+
+/* Logout button */
+.logout-btn {
+    margin-top: 30px;
+    background: #e74c3c;
+    text-align: center;
+    color: white !important;
 }
 
 /* Main */
@@ -64,66 +70,56 @@ body {
 .card {
     background: #fff;
     padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
 }
 
 /* Table */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 15px;
-}
-
-th, td {
-    padding: 12px;
-    text-align: center;
 }
 
 th {
-    background: #f1f1f1;
-    font-weight: 600;
+    background: #eee;
+    padding: 12px;
 }
 
-tr:hover {
-    background: #f9f9f9;
+td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
 }
 
-/* Status Styles */
+/* Status */
 .status {
-    padding: 6px 10px;
+    padding: 6px 12px;
     border-radius: 6px;
+    color: white;
     font-size: 13px;
 }
 
-.paid {
-    background: #d4edda;
-    color: #155724;
-}
-
-.upi {
-    background: #cce5ff;
-    color: #004085;
-}
+.paid { background: #2ecc71; }
+.pending { background: #f39c12; }
 </style>
 </head>
 
 <body>
 
-<!-- Sidebar -->
 <div class="sidebar">
-    <h2>Admin Panel</h2>
-    <a href="adminDashboard.php">Dashboard</a>
-    <a href="apartments.php">Apartments</a>
-    <a href="tenants.php">Tenants</a>
-    <a href="payments.php">Payments</a>
-    <a href="maintenance.php">Maintenance</a>
-    <a href="logout.php">Logout</a>
+<h2>Admin Panel</h2>
+<a href="adminDashboard.php">Dashboard</a>
+<a href="apartments.php">Apartments</a>
+<a href="tenants.php">Tenants</a>
+<a href="payments.php">Payments</a>
+<a href="maintenance.php">Maintenance</a>
+
+<a href="logout.php" class="logout-btn">Logout</a>
 </div>
 
-<!-- Main -->
 <div class="main">
 <div class="card">
+
 <h2>💰 Payments</h2>
 
 <table>
@@ -136,30 +132,36 @@ tr:hover {
 </tr>
 
 <?php while($row = mysqli_fetch_assoc($result)) { ?>
-<tr>
 
-<td><?= $row['Payment_ID'] ?></td>
+<tr>
+<td><?= $row['id'] ?></td>
 
 <td>
 <?= !empty($row['tenant_name']) ? $row['tenant_name'] : 'Unknown' ?>
 </td>
 
-<td>₹<?= number_format($row['Payment_Amount'], 2) ?></td>
+<td>₹<?= number_format($row['amount'] ?? 0, 2) ?></td>
 
-<td><?= $row['Payment_Date'] ?></td>
+<td><?= $row['date'] ?></td>
 
 <td>
-<?php if (strpos($row['Payment_Status'], 'UPI') !== false) { ?>
-    <span class="status upi"><?= $row['Payment_Status'] ?></span>
-<?php } else { ?>
-    <span class="status paid"><?= $row['Payment_Status'] ?></span>
-<?php } ?>
+<?php
+$status = $row['status'] ?? 'Pending';
+
+if (stripos($status, 'paid') !== false) {
+    echo "<span class='status paid'>$status</span>";
+} else {
+    echo "<span class='status pending'>$status</span>";
+}
+?>
 </td>
 
 </tr>
+
 <?php } ?>
 
 </table>
+
 </div>
 </div>
 

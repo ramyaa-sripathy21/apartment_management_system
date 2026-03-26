@@ -9,10 +9,15 @@ if (!isset($_SESSION['admin_id'])) {
 
 /* ✅ FETCH MAINTENANCE WITH TENANT NAME */
 $result = mysqli_query($conn, "
-SELECT m.*, t.Name AS tenant_name
-FROM Maintenance m
-LEFT JOIN Tenant t ON m.Tenant_ID = t.Tenant_ID
-ORDER BY m.Request_ID DESC
+SELECT 
+    m.id,
+    m.issue,
+    m.status,
+    t.Name AS tenant_name
+FROM maintenance m
+LEFT JOIN Tenant t 
+ON m.tenant_id = t.Tenant_ID
+ORDER BY m.id DESC
 ");
 ?>
 
@@ -161,34 +166,21 @@ tr:hover {
 
 <?php while($row = mysqli_fetch_assoc($result)) { ?>
 <tr>
+    <td><?= $row['id'] ?></td>
 
-<td><?= $row['Request_ID'] ?></td>
+    <td>
+        <?= !empty($row['tenant_name']) ? $row['tenant_name'] : 'Unknown' ?>
+    </td>
 
-<td>
-<?= !empty($row['tenant_name']) ? $row['tenant_name'] : 'Unknown' ?>
-</td>
+    <td><?= $row['issue'] ?></td>
 
-<td><?= $row['Issue_Description'] ?></td>
-
-<td>
-<?php if ($row['Status'] == 'Pending') { ?>
-    <span class="pending">Pending</span>
-<?php } else { ?>
-    <span class="done">Completed</span>
-<?php } ?>
-</td>
-
-<td>
-<?php if ($row['Status'] == 'Pending') { ?>
-    <form method="POST" action="updateMaintenance.php">
-        <input type="hidden" name="id" value="<?= $row['Request_ID'] ?>">
-        <button class="btn">Done</button>
-    </form>
-<?php } else { ?>
-    ✔
-<?php } ?>
-</td>
-
+    <td>
+        <?php if ($row['status'] == 'Pending') { ?>
+            <span class="pending">Pending</span>
+        <?php } else { ?>
+            <span class="completed">Completed</span>
+        <?php } ?>
+    </td>
 </tr>
 <?php } ?>
 
