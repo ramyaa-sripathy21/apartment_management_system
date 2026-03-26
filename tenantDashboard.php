@@ -38,7 +38,7 @@ $my_apartment_result = mysqli_query($conn, $my_apartment_query);
     <div class="sidebar">
         <h2>Tenant Panel</h2>
         <a href="#">Home</a>
-        <a href="makePayments.php">Payments</a>
+        <a href="makePayment.php">Payments</a>
         <a href="maintenanceRequest.php">Maintenance</a>
         <a href="logout.php" class="logout">Logout</a>
     </div>
