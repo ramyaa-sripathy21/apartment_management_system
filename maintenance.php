@@ -15,7 +15,7 @@ SELECT
     m.status,
     t.Name AS tenant_name
 FROM maintenance m
-LEFT JOIN Tenant t 
+LEFT JOIN Tenant t
 ON m.tenant_id = t.Tenant_ID
 ORDER BY m.id DESC
 ");
