@@ -229,10 +229,10 @@ table tr:hover {
                     <td>₹<?php echo $row['rent']; ?></td>
 
                     <td>
-                        <?php if($row['status'] == 'Available'){ ?>
-                            <span class="status available">Available</span>
+                        <?php if (empty($row['tenant_id'])) { ?>
+                          <span class="status available">Available</span>
                         <?php } else { ?>
-                            <span class="status occupied">Occupied</span>
+                          <span class="status occupied">Occupied</span>
                         <?php } ?>
                     </td>
                 </tr>
