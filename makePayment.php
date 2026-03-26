@@ -34,6 +34,10 @@ if (isset($_POST['pay'])) {
 
     $amount = $rent; // ✅ FIXED (IMPORTANT)
 
+    if (!$tenant_id || $tenant_id <= 0) {
+    die("Invalid tenant ID");
+}
+
     $stmt = $conn->prepare("
         INSERT INTO payments (tenant_id, amount, date, status)
         VALUES (?, ?, CURDATE(), ?)
