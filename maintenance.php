@@ -178,9 +178,21 @@ tr:hover {
         <?php if ($row['status'] == 'Pending') { ?>
             <span class="pending">Pending</span>
         <?php } else { ?>
-            <span class="completed">Completed</span>
+            <span class="done">Completed</span>
         <?php } ?>
     </td>
+
+    <!-- ✅ ADD THIS -->
+    <td>
+        <?php if ($row['status'] == 'Pending') { ?>
+            <a href="completeMaintenance.php?id=<?= $row['id'] ?>" class="btn">
+                Done
+            </a>
+        <?php } else { ?>
+            ✔
+        <?php } ?>
+    </td>
+
 </tr>
 <?php } ?>
 
