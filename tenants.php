@@ -64,16 +64,113 @@ LEFT JOIN apartments ON tenants.apartment_id = apartments.id
 <title>Tenants</title>
 
 <style>
-body { display:flex; background:#f4f6f9; font-family:Segoe UI; }
-.sidebar { width:230px; background:#1e1e2f; color:#fff; padding:20px; height:100vh; }
-.sidebar a { display:block; color:#ccc; margin:10px 0; text-decoration:none; }
-.main { flex:1; padding:30px; }
-.card { background:#fff; padding:25px; border-radius:10px; margin-bottom:20px; }
-input,select { width:100%; padding:10px; margin:8px 0; }
-button { width:100%; padding:10px; background:#2196F3; color:#fff; border:none; }
-table { width:100%; border-collapse:collapse; }
-th,td { padding:10px; border-bottom:1px solid #ddd; }
-.drop-btn { background:red; color:#fff; padding:5px 8px; text-decoration:none; }
+body {
+    margin: 0;
+    font-family: 'Segoe UI';
+    background: #f4f6f9;
+    display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 230px;
+    background: #1e1e2f;
+    color: white;
+    padding: 20px;
+    height: 100vh;
+}
+
+.sidebar h2 {
+    margin-bottom: 20px;
+}
+
+.sidebar a {
+    display: block;
+    color: #ccc;
+    padding: 10px;
+    text-decoration: none;
+    border-radius: 6px;
+}
+
+.sidebar a:hover {
+    background: #333;
+    color: white;
+}
+
+/* Main */
+.main {
+    flex: 1;
+    padding: 30px;
+}
+
+/* Cards */
+.card {
+    background: white;
+    padding: 25px;
+    margin-bottom: 25px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Form */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+input, select {
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+/* Button */
+button {
+    padding: 12px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+button:hover {
+    background: #2980b9;
+}
+
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th {
+    background: #eee;
+    padding: 12px;
+}
+
+td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Drop Button */
+.drop-btn {
+    background: #e74c3c;
+    padding: 6px 12px;
+    border-radius: 5px;
+    color: white;
+    text-decoration: none;
+}
+
+.drop-btn:hover {
+    background: #c0392b;
+}
 </style>
 </head>
 
@@ -95,23 +192,20 @@ th,td { padding:10px; border-bottom:1px solid #ddd; }
 <h2>Add Tenant</h2>
 
 <form method="POST">
-<input type="text" name="name" placeholder="Name" required>
-<input type="text" name="contact" placeholder="Contact" required>
-<input type="date" name="start" required>
-<input type="date" name="end" required>
+    <input type="text" name="name" placeholder="Tenant Name" required>
 
-<select name="apartment_id" required>
-<option value="">Select Apartment</option>
+    <input type="text" name="contact" placeholder="Phone Number" required>
 
-<?php while($apt = mysqli_fetch_assoc($apartments)) { ?>
-<option value="<?php echo $apt['id']; ?>">
-<?php echo $apt['apartment_no']; ?>
-</option>
-<?php } ?>
+    <input type="date" name="start_date" required>
 
-</select>
+    <input type="date" name="end_date" required>
 
-<button name="addTenant">Add Tenant</button>
+    <select name="apartment_no" required>
+        <option value="">Select Apartment</option>
+        <!-- PHP loop here -->
+    </select>
+
+    <button type="submit">Add Tenant</button>
 </form>
 </div>
 
