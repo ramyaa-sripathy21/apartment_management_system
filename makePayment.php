@@ -8,6 +8,11 @@ if (!isset($_SESSION['tenant_id'])) {
 }
 $tenant_id = $_SESSION['tenant_id'];
 
+$nameQuery = mysqli_query($conn, "SELECT Name FROM Tenant WHERE Tenant_ID='$tenant_id'");
+$data = mysqli_fetch_assoc($nameQuery);
+
+$name = $data['Name'] ?? 'Tenant';
+
 $sql = "
 SELECT SUM(rent) AS total_rent
 FROM apartments
