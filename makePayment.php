@@ -6,22 +6,18 @@ if (!isset($_SESSION['tenant_id'])) {
     header("Location: login.php");
     exit();
 }
-
 $tenant_id = $_SESSION['tenant_id'];
-$name = $_SESSION['tenant_name'] ?? 'Tenant';
 
-/* ✅ FETCH RENT */
 $sql = "
-SELECT a.Rent_Amount 
-FROM Apartment a
-JOIN Tenant t ON t.Apartment_No = a.Apartment_No
-WHERE t.Tenant_ID = '$tenant_id'
+SELECT SUM(Rent_Amount) AS total_rent
+FROM apartments
+WHERE tenant_id = '$tenant_id'
 ";
 
 $result = mysqli_query($conn, $sql);
 
 if ($row = mysqli_fetch_assoc($result)) {
-    $rent = $row['Rent_Amount'];
+    $rent = $row['total_rent'] ?? 0;
 } else {
     $rent = 0;
 }

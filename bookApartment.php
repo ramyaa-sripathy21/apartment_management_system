@@ -17,17 +17,26 @@ if (!isset($_POST['apartment_no']) || empty($_POST['apartment_no'])) {
 
 $apartment_no = $_POST['apartment_no'];
 
-/* -------- CHECK IF ALREADY BOOKED -------- */
-$check = mysqli_query($conn, "SELECT * FROM apartments WHERE tenant_id='$tenant_id'");
+/* -------- CHECK IF APARTMENT ALREADY BOOKED -------- */
+$check = mysqli_query($conn, "
+    SELECT * FROM apartments 
+    WHERE apartment_no='$apartment_no' AND status='occupied'
+");
+
 if (mysqli_num_rows($check) > 0) {
-    echo "<script>alert('You already booked an apartment!'); window.location='tenantDashboard.php';</script>";
+    echo "<script>
+        alert('Apartment already booked!');
+        window.location='tenantDashboard.php';
+    </script>";
     exit();
 }
 
-/* -------- BOOK APARTMENT -------- */
-$update = "UPDATE apartments 
-           SET tenant_id='$tenant_id', status='occupied' 
-           WHERE apartment_no='$apartment_no'";
+/* -------- BOOK APARTMENT (ALLOW MULTIPLE) -------- */
+$update = "
+UPDATE apartments 
+SET tenant_id='$tenant_id', status='occupied' 
+WHERE apartment_no='$apartment_no'
+";
 
 if (mysqli_query($conn, $update)) {
     echo "<script>
