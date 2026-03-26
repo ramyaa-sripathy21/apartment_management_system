@@ -10,21 +10,19 @@ if (!isset($_SESSION['tenant_id'])) {
 $tenant_id = $_SESSION['tenant_id'];
 $name = $_SESSION['tenant_name'] ?? 'Tenant';
 
-// ✅ Get TOTAL rent
 $sql = "
-SELECT SUM(a.Rent_Amount) AS total_rent
-FROM tenant_apartment_booking t
-JOIN apartment a ON t.Apartment_No = a.Apartment_No
-WHERE t.Tenant_ID = ?
+SELECT Rent_Amount 
+FROM Apartment 
+WHERE tenant_id = '$tenant_id'
 ";
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $tenant_id);
-$stmt->execute();
-$res = $stmt->get_result();
-$row = $res->fetch_assoc();
+$result = mysqli_query($conn, $sql);
 
-$amount = $row['total_rent'] ?? 0;
+if ($row = mysqli_fetch_assoc($result)) {
+    $rent = $row['Rent_Amount'];
+} else {
+    $rent = 0;
+}
 
 // ✅ UPI QR
 $upi_id = "ramya@oksbi"; // change this
