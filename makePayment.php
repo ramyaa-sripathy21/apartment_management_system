@@ -8,7 +8,9 @@ if (!isset($_SESSION['tenant_id'])) {
 }
 
 $tenant_id = $_SESSION['tenant_id'];
+$name = $_SESSION['tenant_name'] ?? 'Tenant';
 
+/* ✅ FETCH RENT */
 $sql = "
 SELECT a.Rent_Amount 
 FROM Apartment a
@@ -24,26 +26,26 @@ if ($row = mysqli_fetch_assoc($result)) {
     $rent = 0;
 }
 
-// ✅ UPI QR
-$upi_id = "ramya@oksbi"; // change this
-$upi_link = "upi://pay?pa=$upi_id&pn=Apartment&am=$amount&cu=INR";
+/* ✅ UPI QR */
+$upi_id = "ramya@oksbi"; // change if needed
+$upi_link = "upi://pay?pa=$upi_id&pn=Apartment&am=$rent&cu=INR";
 $qr_url = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" . urlencode($upi_link);
 
 
-// ✅ PAYMENT HANDLE (FIXED)
+/* ✅ PAYMENT HANDLE */
 if (isset($_POST['pay'])) {
 
     $method = $_POST['method'];
     $status = "Paid via " . $method;
 
     try {
-        $stmt2 = $conn->prepare("
-            INSERT INTO payments (tenant_id, amount, date, status)
+        $stmt = $conn->prepare("
+            INSERT INTO Payment (Tenant_ID, Payment_Amount, Payment_Date, Payment_Status)
             VALUES (?, ?, CURDATE(), ?)
         ");
 
-        $stmt2->bind_param("ids", $tenant_id, $amount, $status);
-        $stmt2->execute();
+        $stmt->bind_param("ids", $tenant_id, $rent, $status);
+        $stmt->execute();
 
         header("Location: makePayment.php?paid=1");
         exit();
@@ -118,7 +120,7 @@ button:hover {
 
 <div class="container">
 
-<!-- ✅ POPUP -->
+<!-- ✅ SUCCESS POPUP -->
 <?php if (isset($_GET['paid'])): ?>
 <script>
 alert("✅ Payment Successful!");
@@ -130,7 +132,7 @@ alert("✅ Payment Successful!");
 <p>Welcome, <b><?= $name ?></b></p>
 
 <p>Total Rent:</p>
-<div class="amount">₹<?= $amount ?></div>
+<div class="amount">₹<?= $rent ?></div>
 
 <!-- QR -->
 <img src="<?= $qr_url ?>" alt="QR Code">
