@@ -9,7 +9,7 @@ if (!isset($_SESSION['tenant_id'])) {
 $tenant_id = $_SESSION['tenant_id'];
 
 $sql = "
-SELECT SUM(Rent_Amount) AS total_rent
+SELECT SUM(rent) AS total_rent
 FROM apartments
 WHERE tenant_id = '$tenant_id'
 ";
