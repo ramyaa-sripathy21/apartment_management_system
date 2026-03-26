@@ -41,11 +41,11 @@ if (isset($_POST['pay'])) {
 
     try {
         $stmt = $conn->prepare("
-            INSERT INTO Payment (Tenant_ID, Payment_Amount, Payment_Date, Payment_Status)
-            VALUES (?, ?, CURDATE(), ?)
+            INSERT INTO payments (tenant_id, amount, date, status)
+        VALUES (?, ?, CURDATE(), ?)
         ");
 
-        $stmt->bind_param("ids", $tenant_id, $rent, $status);
+        $stmt->bind_param("ids", $tenant_id, $amount, $status);
         $stmt->execute();
 
         header("Location: makePayment.php?paid=1");

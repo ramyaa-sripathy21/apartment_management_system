@@ -5,16 +5,16 @@ include("db.php");
 $result = mysqli_query($conn, "
 SELECT 
     p.id,
+    p.tenant_id,
     p.amount,
     p.date,
     p.status,
-    t.name AS tenant_name
+    t.Name AS tenant_name
 FROM payments p
-LEFT JOIN tenants t 
-ON p.tenant_id = t.id
+LEFT JOIN Tenant t 
+ON p.tenant_id = t.Tenant_ID
 ORDER BY p.id DESC
-");
-?>
+"); ?>
 
 <!DOCTYPE html>
 <html>
@@ -55,7 +55,7 @@ body {
 /* Logout button */
 .logout-btn {
     margin-top: 30px;
-    background: #e74c3c;
+    background: #333;
     text-align: center;
     color: white !important;
 }
@@ -140,9 +140,9 @@ td {
 <?= !empty($row['tenant_name']) ? $row['tenant_name'] : 'Unknown' ?>
 </td>
 
-<td>₹<?= number_format($row['amount'] ?? 0, 2) ?></td>
-
-<td><?= $row['date'] ?></td>
+<td>₹<?= number_format($row['amount'] ?? 0, 2) ?>
+<?= $row['date'] ?? 'N/A' ?>
+<?= $row['status'] ?? 'Pending' ?>
 
 <td>
 <?php
