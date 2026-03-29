@@ -2,9 +2,11 @@
 session_start();
 include 'db.php';
 
-if (isset($_POST['login'])) {
+$error_message = "";
 
-    $name = $_POST['name'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    $name = $_POST['username'];
     $password = $_POST['password'];
 
     $result = mysqli_query($conn, "
@@ -16,19 +18,19 @@ if (isset($_POST['login'])) {
 
         $row = mysqli_fetch_assoc($result);
 
-        // ✅ CLEAR OLD SESSION (IMPORTANT)
-        session_unset();
-        session_destroy();
-        session_start();
+        // ✅ CLEAR OLD SESSION SAFELY
+        $_SESSION = [];
 
-        // ✅ SET CORRECT TENANT
+        // ✅ SET NEW SESSION
         $_SESSION['tenant_id'] = $row['Tenant_ID'];
+
+        session_regenerate_id(true);
 
         header("Location: tenantDashboard.php");
         exit();
 
     } else {
-        echo "Invalid login";
+        $error_message = "Invalid username or password!";
     }
 }
 ?>
@@ -40,7 +42,6 @@ if (isset($_POST['login'])) {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tenant Login</title>
 
-<!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
 
 <style>
@@ -119,12 +120,10 @@ button:hover {
 <div class="login-container">
     <h2>Tenant Login</h2>
 
-    <!-- Error Message -->
     <?php if (!empty($error_message)) { ?>
         <div class="error"><?php echo $error_message; ?></div>
     <?php } ?>
 
-    <!-- Login Form -->
     <form method="POST">
         <label>Username</label>
         <input type="text" name="username" placeholder="Enter username" required>
@@ -132,6 +131,7 @@ button:hover {
         <label>Password</label>
         <input type="password" name="password" placeholder="Enter password" required>
 
+        <!-- ✅ FIXED BUTTON -->
         <button type="submit">Login</button>
     </form>
 
