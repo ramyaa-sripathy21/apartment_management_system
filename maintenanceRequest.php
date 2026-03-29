@@ -10,8 +10,8 @@ if (!isset($_SESSION['tenant_id'])) {
 $name = $_SESSION['tenant_name'] ?? 'Tenant';
 $tenant_id = $_SESSION['tenant_id'];
 
-echo "Maintenance Tenant ID = " . $tenant_id;
-exit();
+//echo "Maintenance Tenant ID = " . $tenant_id;
+//exit();
 
 // ✅ HANDLE SUBMIT (FIXED)
 if (isset($_POST['submit'])) {

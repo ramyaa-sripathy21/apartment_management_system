@@ -9,8 +9,8 @@ if (!isset($_SESSION['tenant_id'])) {
 
 $tenant_id = $_SESSION['tenant_id'];
 
-echo "Shelly Tenant ID = " . $tenant_id;
-exit();
+//echo "Shelly Tenant ID = " . $tenant_id;
+//exit();
 
 // ✅ Fetch tenant name
 $nameQuery = mysqli_query($conn, "SELECT Name FROM Tenant WHERE Tenant_ID='$tenant_id'");
