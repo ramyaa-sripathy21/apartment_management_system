@@ -33,21 +33,24 @@ if(isset($_POST['addTenant'])){
 }
 
 // DROP TENANT
-if(isset($_GET['drop'])){
+if (isset($_GET['drop'])) {
+
     $tenant_id = $_GET['drop'];
 
-    // GET APARTMENT ID
-    $get = mysqli_query($conn, "SELECT apartment_id FROM tenants WHERE id=$tenant_id");
-    $row = mysqli_fetch_assoc($get);
-    $apartment_id = $row['apartment_id'];
+    // ✅ Remove tenant from apartment
+    $query = "UPDATE apartments 
+              SET tenant_id=NULL, status='available' 
+              WHERE tenant_id='$tenant_id'";
 
-    // MAKE APARTMENT AVAILABLE AGAIN
-    mysqli_query($conn, "UPDATE apartments SET status='available' WHERE id=$apartment_id");
+    if (mysqli_query($conn, $query)) {
 
-    // DELETE TENANT
-    mysqli_query($conn, "DELETE FROM tenants WHERE id=$tenant_id");
+        // ✅ REDIRECT WITH SUCCESS FLAG
+        header("Location: tenants.php?success=1");
+        exit();
 
-    echo "<script>alert('Tenant Dropped'); window.location='tenants.php';</script>";
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
 }
 
 // FETCH TENANTS WITH APARTMENT NUMBER
@@ -173,6 +176,13 @@ td {
 }
 </style>
 </head>
+<?php if (isset($_GET['success'])) { ?>
+<script>
+    window.onload = function() {
+        alert("✅ Tenant dropped successfully!");
+    };
+</script>
+<?php } ?>
 
 <body>
 
