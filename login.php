@@ -10,9 +10,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     $result = mysqli_query($conn, "
-        SELECT * FROM Tenant 
-        WHERE Name='$name' AND password='$password'
-    ");
+    SELECT * FROM Tenant 
+    WHERE Login_Username='$name' 
+    AND Login_Password='$password'
+");
 
     if (mysqli_num_rows($result) > 0) {
 
