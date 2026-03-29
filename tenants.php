@@ -20,45 +20,41 @@ if(isset($_POST['addTenant'])){
         echo "<script>alert('Please select an apartment');</script>";
     } else {
 
-        // INSERT TENANT
         mysqli_query($conn, "INSERT INTO tenants (name, contact, start_date, end_date, apartment_id)
         VALUES ('$name','$contact','$start','$end','$apartment_id')");
 
-        // UPDATE APARTMENT STATUS
-        mysqli_query($conn, "UPDATE apartments SET status='occupied' WHERE id='$apartment_id'");
+        mysqli_query($conn, "UPDATE apartments 
+                             SET status='occupied' 
+                             WHERE id='$apartment_id'");
 
         echo "<script>alert('Tenant Added Successfully'); window.location='tenants.php';</script>";
     }
 }
 
-/* -------- DROP TENANT (FIXED) -------- */
+/* -------- DROP TENANT -------- */
 if (isset($_GET['drop'])) {
 
     $tenant_id = $_GET['drop'];
 
-    // 🔥 STEP 1: Get apartment_id of tenant
+    // Get apartment_id
     $get = mysqli_query($conn, "SELECT apartment_id FROM tenants WHERE id='$tenant_id'");
     $row = mysqli_fetch_assoc($get);
 
+    // If assigned → free apartment
     if ($row && !empty($row['apartment_id'])) {
 
         $apartment_id = $row['apartment_id'];
 
-        // 🔥 STEP 2: Make apartment available
         mysqli_query($conn, "UPDATE apartments 
                              SET status='available' 
                              WHERE id='$apartment_id'");
-
-        // 🔥 STEP 3: Delete tenant
-        mysqli_query($conn, "DELETE FROM tenants WHERE id='$tenant_id'");
-
-        header("Location: tenants.php?success=1");
-        exit();
-
-    } else {
-        header("Location: tenants.php?error=1");
-        exit();
     }
+
+    // Delete tenant
+    mysqli_query($conn, "DELETE FROM tenants WHERE id='$tenant_id'");
+
+    header("Location: tenants.php?success=1");
+    exit();
 }
 
 /* -------- FETCH TENANTS -------- */
@@ -82,6 +78,7 @@ body {
     display: flex;
 }
 
+/* Sidebar */
 .sidebar {
     width: 230px;
     background: #1e1e2f;
@@ -90,11 +87,16 @@ body {
     height: 100vh;
 }
 
+.sidebar h2 {
+    margin-bottom: 20px;
+}
+
 .sidebar a {
     display: block;
     color: #ccc;
     padding: 10px;
     text-decoration: none;
+    border-radius: 6px;
 }
 
 .sidebar a:hover {
@@ -102,35 +104,76 @@ body {
     color: white;
 }
 
+/* Main */
 .main {
     flex: 1;
     padding: 30px;
 }
 
+/* Card */
 .card {
     background: white;
     padding: 25px;
     margin-bottom: 25px;
     border-radius: 12px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
 }
 
+/* Form */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+input, select {
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* Button */
+button {
+    padding: 12px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #2980b9;
+}
+
+/* Table */
 table {
     width: 100%;
     border-collapse: collapse;
 }
 
-th, td {
+th {
+    background: #eee;
+    padding: 12px;
+}
+
+td {
     padding: 12px;
     text-align: center;
     border-bottom: 1px solid #ddd;
 }
 
+/* Drop Button */
 .drop-btn {
     background: #e74c3c;
     padding: 6px 12px;
     border-radius: 5px;
     color: white;
     text-decoration: none;
+}
+
+.drop-btn:hover {
+    background: #c0392b;
 }
 </style>
 </head>
@@ -144,22 +187,43 @@ th, td {
 </script>
 <?php } ?>
 
-<!-- ❌ ERROR POPUP -->
-<?php if (isset($_GET['error'])) { ?>
-<script>
-    alert("❌ Something went wrong!");
-</script>
-<?php } ?>
-
 <div class="sidebar">
 <h2>Admin Panel</h2>
 <a href="adminDashboard.php">Dashboard</a>
 <a href="apartments.php">Apartments</a>
 <a href="tenants.php">Tenants</a>
+<a href="payments.php">Payments</a>
+<a href="maintenance.php">Maintenance</a>
 </div>
 
 <div class="main">
 
+<!-- ✅ ADD TENANT (RESTORED) -->
+<div class="card">
+<h2>Add Tenant</h2>
+
+<form method="POST">
+    <input type="text" name="name" placeholder="Tenant Name" required>
+    <input type="text" name="contact" placeholder="Phone Number" required>
+    <input type="date" name="start_date" required>
+    <input type="date" name="end_date" required>
+
+    <select name="apartment_id" required>
+        <option value="">Select Apartment</option>
+
+        <?php while($apt = mysqli_fetch_assoc($apartments)) { ?>
+            <option value="<?php echo $apt['id']; ?>">
+                <?php echo $apt['apartment_no']; ?>
+            </option>
+        <?php } ?>
+
+    </select>
+
+    <button type="submit" name="addTenant">Add Tenant</button>
+</form>
+</div>
+
+<!-- ✅ TENANTS TABLE -->
 <div class="card">
 <h2>All Tenants</h2>
 
