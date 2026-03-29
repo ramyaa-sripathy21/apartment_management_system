@@ -1,56 +1,35 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
+session_start();
 include 'db.php';
 
-$error_message = "";
+if (isset($_POST['login'])) {
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name = $_POST['name'];
+    $password = $_POST['password'];
 
-    $username = trim($_POST['username']);
-    $password = trim($_POST['password']);
+    $result = mysqli_query($conn, "
+        SELECT * FROM Tenant 
+        WHERE Name='$name' AND password='$password'
+    ");
 
-    if (empty($username) || empty($password)) {
-        $error_message = "Please fill all fields!";
+    if (mysqli_num_rows($result) > 0) {
+
+        $row = mysqli_fetch_assoc($result);
+
+        // ✅ CLEAR OLD SESSION (IMPORTANT)
+        session_unset();
+        session_destroy();
+        session_start();
+
+        // ✅ SET CORRECT TENANT
+        $_SESSION['tenant_id'] = $row['Tenant_ID'];
+
+        header("Location: tenantDashboard.php");
+        exit();
+
     } else {
-
-        // ✅ Correct table & column names
-        $stmt = $conn->prepare("SELECT * FROM tenants WHERE username = ?");
-        $stmt->bind_param("s", $username);
-        $stmt->execute();
-
-        $result = $stmt->get_result();
-
-        if ($result->num_rows > 0) {
-
-            $user = $result->fetch_assoc();
-
-            // ✅ Compare password
-            if ($password == $user['password']) {
-
-                $_SESSION['tenant_id'] = $user['id'];
-                $_SESSION['tenant_name'] = $user['name'];
-
-                header("Location: tenantDashboard.php");
-                exit();
-
-            } else {
-                $error_message = "Incorrect password!";
-            }
-
-        } else {
-            $error_message = "User not found!";
-        }
-
-        $stmt->close();
+        echo "Invalid login";
     }
-
-    $conn->close();
 }
 ?>
 
