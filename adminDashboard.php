@@ -1,12 +1,14 @@
 <?php
-// ===== DATABASE CONNECTION =====
 include("db.php");
 
-// ===== FETCH COUNTS =====
-$apartments = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM apartments"));
-$tenants = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM tenants"));
-$payments = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM payments"));
-$maintenance = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM maintenance"));
+/* ===== FETCH COUNTS (CORRECT WAY) ===== */
+$apartments = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM apartments"))['total'];
+
+$tenants = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM tenants"))['total'];
+
+$payments = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM payments"))['total'];
+
+$maintenance = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS total FROM maintenance"))['total'];
 ?>
 
 <!DOCTYPE html>
@@ -23,7 +25,6 @@ $maintenance = mysqli_num_rows(mysqli_query($conn, "SELECT * FROM maintenance"))
     font-family: 'Segoe UI', sans-serif;
 }
 
-/* Body */
 body {
     display: flex;
     background: #f4f6f9;
@@ -58,7 +59,7 @@ body {
     color: #fff;
 }
 
-/* Main Content */
+/* Main */
 .main {
     margin-left: 230px;
     padding: 30px;
@@ -73,14 +74,13 @@ body {
     color: #333;
 }
 
-/* Cards Grid */
+/* Cards */
 .cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
     gap: 20px;
 }
 
-/* Card */
 .card {
     background: #fff;
     padding: 25px;
@@ -93,7 +93,6 @@ body {
     transform: translateY(-5px);
 }
 
-/* Card Text */
 .card h3 {
     font-size: 16px;
     color: #777;
@@ -106,7 +105,7 @@ body {
     color: #333;
 }
 
-/* Colored Borders */
+/* Colors */
 .apartments { border-left: 6px solid #4CAF50; }
 .tenants { border-left: 6px solid #2196F3; }
 .payments { border-left: 6px solid #FF9800; }
@@ -114,12 +113,8 @@ body {
 
 /* Responsive */
 @media(max-width: 768px) {
-    .sidebar {
-        display: none;
-    }
-    .main {
-        margin-left: 0;
-    }
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
 }
 </style>
 </head>
@@ -137,7 +132,7 @@ body {
     <a href="logout.php">Logout</a>
 </div>
 
-<!-- Main Content -->
+<!-- Main -->
 <div class="main">
 
     <div class="header">Welcome Admin 👋</div>
