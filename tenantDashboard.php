@@ -54,13 +54,13 @@ $my_apartment_result = mysqli_query($conn, $my_apartment_query);
 
         <!-- 🔥 WELCOME -->
         <div class="card welcome">
-            <h2>Welcome back, <?php echo $tenant['name']; ?> 👋</h2>
+            <h2>Welcome back, <?php echo $tenant['Name'] ?? 'Tenant'; ?> 👋</h2>
             <p>Your smart living dashboard is ready 🚀</p>
 
             <div class="info">
-                <p><strong>Email:</strong> <?php echo $tenant['email']; ?></p>
-                <p><strong>Phone:</strong> <?php echo $tenant['phone']; ?></p>
-                <p><strong>Tenant ID:</strong> <?php echo $tenant['id']; ?></p>
+                <p><strong>Email:</strong> <?php echo $tenant['Email'] ?? 'N/A'; ?></p>
+                <p><strong>Phone:</strong> <?php echo $tenant['Phone'] ?? 'N/A'; ?></p>
+                <p><strong>Tenant ID:</strong> <?php echo $tenant['Tenant_ID'] ?? 'N/A'; ?></p>
             </div>
         </div>
 
