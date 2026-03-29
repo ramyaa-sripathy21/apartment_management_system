@@ -10,9 +10,15 @@ if (!isset($_SESSION['tenant_id'])) {
 $tenant_id = $_SESSION['tenant_id'];
 
 /* -------- FETCH TENANT DETAILS -------- */
-$tenant_query = "SELECT * FROM tenants WHERE id='$tenant_id'";
+$tenant_query = "SELECT * FROM Tenant WHERE Tenant_ID='$tenant_id'";
 $tenant_result = mysqli_query($conn, $tenant_query);
 $tenant = mysqli_fetch_assoc($tenant_result);
+
+// ✅ prevent null error
+if (!$tenant) {
+    echo "Error: Tenant not found. Please login again.";
+    exit();
+}
 
 /* -------- AVAILABLE APARTMENTS -------- */
 $available_query = "SELECT * FROM apartments WHERE status='available'";
