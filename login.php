@@ -5,14 +5,13 @@ include 'db.php';
 $error_message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+$name = trim($_POST['username']);
+$password = trim($_POST['password']);
 
-    $name = $_POST['username'];
-    $password = $_POST['password'];
-
-    $result = mysqli_query($conn, "
+$result = mysqli_query($conn, "
     SELECT * FROM Tenant 
-    WHERE Login_Username='$name' 
-    AND Login_Password='$password'
+    WHERE LOWER(Login_Username) = LOWER('$name')
+    AND Login_Password = '$password'
 ");
 
     if (mysqli_num_rows($result) > 0) {
